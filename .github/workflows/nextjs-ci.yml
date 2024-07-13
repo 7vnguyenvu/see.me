@@ -82,9 +82,6 @@ jobs:
               env:
                   TOP_PROGRESS: ${{ secrets.TOP_PROGRESS }}
 
-            - name: Debug environment variable
-              run: echo "TOP_PROGRESS's value is ${{ secrets.TOP_PROGRESS }}"
-
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
               with:
