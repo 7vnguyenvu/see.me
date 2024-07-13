@@ -16,6 +16,10 @@ export const metadata: Metadata = {
     },
 };
 
+export async function generateStaticParams() {
+    return [{ lang: "vi" }, { lang: "en" }];
+}
+
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: Record<string, "en" | "vi"> }) {
     return (
         <html lang={params.lang ?? "vi"}>

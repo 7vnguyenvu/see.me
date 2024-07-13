@@ -7,11 +7,6 @@ import { useColorScheme } from "@mui/joy/styles";
 import { useGlobalContext } from "@/context/store";
 import { useSystemColorMode } from "@/hooks";
 
-export async function generateStaticParams() {
-    // Define the possible values for the `lang` parameter
-    return [{ lang: "en" }, { lang: "vi" }];
-}
-
 export default function Home() {
     const { lang } = useGlobalContext();
     const { mode } = useColorScheme();
@@ -31,7 +26,7 @@ export default function Home() {
 
     return (
         <div>
-            <Link href={`/`}>Home</Link>
+            <Link href={`/${lang}`}>Home</Link>
             <hr />
             <h1>Chế độ hiện tại [mode]: {mode}</h1>
             <p>Chế độ hệ thống [systemMode]: {systemMode}</p>
