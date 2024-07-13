@@ -81,7 +81,7 @@ jobs:
               run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
             - name: Debug environment variable
-              run: echo "TOP_PROGRESS's value is $TOP_PROGRESS"
+              run: echo "TOP_PROGRESS's value is ${{ secrets.TOP_PROGRESS }}"
               env:
                   TOP_PROGRESS: ${{ secrets.TOP_PROGRESS }}
 
