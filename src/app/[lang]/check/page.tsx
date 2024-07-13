@@ -7,6 +7,11 @@ import { useColorScheme } from "@mui/joy/styles";
 import { useGlobalContext } from "@/context/store";
 import { useSystemColorMode } from "@/hooks";
 
+export async function generateStaticParams() {
+    // Define the possible values for the `lang` parameter
+    return [{ lang: "en" }, { lang: "vi" }];
+}
+
 export default function Home() {
     const { lang } = useGlobalContext();
     const { mode } = useColorScheme();
