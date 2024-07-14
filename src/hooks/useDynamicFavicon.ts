@@ -8,7 +8,8 @@ export function useDynamicFavicon() {
         const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
         if (favicon) {
             const timestamp = new Date().getTime();
-            favicon.href = mode === "dark" ? `/see.me-light.ico?v=${timestamp}` : `/see.me-dark.ico?v=${timestamp}`;
+            favicon.href = mode === "dark" ? `/see.me-light.svg?v=${timestamp}` : `/see.me-dark.svg?v=${timestamp}`;
+            favicon.type = "image/svg+xml";
         }
     }, [mode]);
 }
