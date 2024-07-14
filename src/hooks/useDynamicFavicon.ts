@@ -7,8 +7,7 @@ export function useDynamicFavicon() {
     useLayoutEffect(() => {
         const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
         if (favicon) {
-            const timestamp = new Date().getTime();
-            favicon.href = mode === "dark" ? `/see.me-light.svg?v=${timestamp}` : `/see.me-dark.svg?v=${timestamp}`;
+            favicon.href = mode === "dark" ? `/see.me-light.svg` : `/see.me-dark.svg`;
             favicon.type = "image/svg+xml";
         }
     }, [mode]);

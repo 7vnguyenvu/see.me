@@ -3,7 +3,7 @@ import React from "react";
 
 export const metadata: Metadata = {
     icons: {
-        icon: "/see.me-dark.ico", // Default
+        icon: "/see.me-dark.svg", // Default
     },
 };
 
