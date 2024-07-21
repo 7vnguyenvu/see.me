@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect } from "react";
-
 import Link from "next/link";
+import React from "react";
 import { useGlobalContext } from "@/context/store";
 
 interface Props {

@@ -1,11 +1,11 @@
+import { Box } from "@mui/joy";
 import { CssVarsProvider } from "@mui/joy/styles";
 import { GlobalContextProvider } from "@/context/store";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
-import { Box } from "@mui/joy";
 
-const inter = Montserrat({ subsets: ["latin"] });
+const font = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: {
@@ -20,11 +20,11 @@ export async function generateStaticParams() {
 
 export default async function Layout({ children, params }: { children: React.ReactNode; params: Record<string, "en" | "vi"> }) {
     return (
-        <GlobalContextProvider lang={params.lang}>
-            <CssVarsProvider defaultMode="system">
+        <CssVarsProvider defaultMode="system">
+            <GlobalContextProvider lang={params.lang}>
                 <NextTopLoader color={process.env.TOP_PROGRESS} showSpinner={false} />
-                <Box className={inter.className}>{children}</Box>
-            </CssVarsProvider>
-        </GlobalContextProvider>
+                <Box className={font.className}>{children}</Box>
+            </GlobalContextProvider>
+        </CssVarsProvider>
     );
 }

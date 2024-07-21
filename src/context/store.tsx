@@ -1,10 +1,10 @@
 "use client";
 
 import { Dispatch, SetStateAction, createContext, useCallback, useContext, useState } from "react";
+import { useDynamicFavicon, useSystemColorMode } from "@/hooks";
 
 import { ApolloProvider } from "@apollo/client";
 import client from "@/apollo-client";
-import { useDynamicFavicon } from "@/hooks";
 
 interface PageSave {
     prev: string | null;
@@ -12,6 +12,7 @@ interface PageSave {
 }
 
 interface ContextProps {
+    systemMode: "light" | "dark";
     lang: "en" | "vi";
     pageSave: PageSave | null;
     setPageSave: Dispatch<SetStateAction<PageSave | null>>;
@@ -21,6 +22,7 @@ interface ContextProps {
 }
 
 const GlobalContext = createContext<ContextProps>({
+    systemMode: "dark",
     lang: "vi",
     pageSave: {} as PageSave,
     setPageSave: (): PageSave | any => {},
@@ -30,6 +32,7 @@ const GlobalContext = createContext<ContextProps>({
 });
 
 export function GlobalContextProvider({ children, lang }: { children: React.ReactNode; lang: "en" | "vi" }) {
+    const systemMode = useSystemColorMode();
     const storedToken = typeof localStorage !== "undefined" ? localStorage.getItem("access-token") : null;
     const [pageSave, setPageSave] = useState<PageSave | null>({
         prev: "",
@@ -43,6 +46,7 @@ export function GlobalContextProvider({ children, lang }: { children: React.Reac
     }, []);
 
     const context = {
+        systemMode,
         lang,
         pageSave,
         setPageSave,
