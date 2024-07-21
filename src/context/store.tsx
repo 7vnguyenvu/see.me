@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, createContext, useCallback, useContext, useState } from "react";
+import { Dispatch, SetStateAction, createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useDynamicFavicon, useSystemColorMode } from "@/hooks";
 
 import { ApolloProvider } from "@apollo/client";
@@ -32,6 +32,7 @@ const GlobalContext = createContext<ContextProps>({
 });
 
 export function GlobalContextProvider({ children, lang }: { children: React.ReactNode; lang: "en" | "vi" }) {
+    let countReRender = 0;
     const systemMode = useSystemColorMode();
     const storedToken = typeof localStorage !== "undefined" ? localStorage.getItem("access-token") : null;
     const [pageSave, setPageSave] = useState<PageSave | null>({
@@ -44,6 +45,12 @@ export function GlobalContextProvider({ children, lang }: { children: React.Reac
         if (url.includes("login")) return;
         setPageSave((prevState) => ({ curr: url, prev: prevState!.curr }));
     }, []);
+
+    // DÒNG LOG CHECK -> XÓA SAU
+    useEffect(() => {
+        console.log("[Store] Render lần:", ++countReRender);
+        console.log("Page-save:", pageSave);
+    }, [pageSave]);
 
     const context = {
         systemMode,
