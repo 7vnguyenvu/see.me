@@ -5,17 +5,18 @@ import { useDynamicFavicon, useSystemColorMode } from "@/hooks";
 
 import { ApolloProvider } from "@apollo/client";
 import client from "@/apollo-client";
+import { usePathname } from "next/navigation";
 
 interface PageSave {
-    prev: string | null;
-    curr: string | null;
+    prev: string;
+    curr: string;
 }
 
 interface ContextProps {
     systemMode: "light" | "dark";
     lang: "en" | "vi";
-    pageSave: PageSave | null;
-    setPageSave: Dispatch<SetStateAction<PageSave | null>>;
+    pageSave: PageSave;
+    setPageSave: Dispatch<SetStateAction<PageSave>>;
     token: string | null;
     setToken: Dispatch<SetStateAction<string | null>>;
     handleClickLinkTo: Function;
@@ -33,18 +34,36 @@ const GlobalContext = createContext<ContextProps>({
 
 export function GlobalContextProvider({ children, lang }: { children: React.ReactNode; lang: "en" | "vi" }) {
     let countReRender = 0;
+    const pathname = usePathname();
     const systemMode = useSystemColorMode();
     const storedToken = typeof localStorage !== "undefined" ? localStorage.getItem("access-token") : null;
-    const [pageSave, setPageSave] = useState<PageSave | null>({
-        prev: "",
-        curr: typeof location !== "undefined" ? location.href.substring(location.href.indexOf(`/${lang}`) + lang.length + 1) || "/" : "",
+    const [pageSave, setPageSave] = useState<PageSave>(() => {
+        if (typeof window !== "undefined") {
+            const currentPath = pathname || "";
+            const langPart = `/${lang}/`;
+            const currPath = currentPath.includes(langPart) ? currentPath.substring(currentPath.indexOf(langPart) + langPart.length) : "/";
+            return {
+                prev: "",
+                curr: currPath,
+            };
+        }
+        return {
+            prev: "",
+            curr: "/",
+        };
     });
     const [token, setToken] = useState<string | null>(storedToken);
 
-    const handleClickLinkTo = useCallback((url: string) => {
-        if (url.includes("login")) return;
-        setPageSave((prevState) => ({ curr: url, prev: prevState!.curr }));
-    }, []);
+    const handleClickLinkTo = useCallback(
+        (url: string) => {
+            if (url.includes("login")) return;
+
+            if (url != pageSave.curr) {
+                setPageSave((prevState) => ({ curr: url, prev: prevState.curr }));
+            }
+        },
+        [pageSave]
+    );
 
     // DÒNG LOG CHECK -> XÓA SAU
     useEffect(() => {
