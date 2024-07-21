@@ -1,7 +1,6 @@
 {
   "name": "see.me-fe",
   "version": "0.1.0",
-  "homepage": "https://7vnguyenvu.github.io/see.me-fe",
   "private": true,
   "scripts": {
     "dev": "set PORT=1200 && next dev",

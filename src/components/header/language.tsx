@@ -4,16 +4,18 @@ import Link from "next/link";
 import { color } from "..";
 import { useGlobalContext } from "@/context/store";
 
+const HOME_PAGE = process.env.NEXT_PUBLIC_HOME_PAGE;
+
 const langs = [
     {
         locale: "vi",
         text: "Vietnamese",
-        flag: "/locales/vietnam-flag.jpg",
+        flag: "locales/vietnam-flag.jpg",
     },
     {
         locale: "en",
         text: "English",
-        flag: "/locales/england-flag.jpg",
+        flag: "locales/england-flag.jpg",
     },
 ];
 
@@ -37,7 +39,7 @@ export default function Languages() {
                         },
                     }}
                 >
-                    <img alt="7" src={langs.find((langItem) => langItem.locale === lang)!.flag} />
+                    <img alt="7" src={`${HOME_PAGE}/${langs.find((langItem) => langItem.locale === lang)?.flag}`} />
                 </Box>
             </MenuButton>
             <Menu

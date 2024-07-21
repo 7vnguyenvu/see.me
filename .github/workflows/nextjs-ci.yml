@@ -81,6 +81,7 @@ jobs:
               run: ${{ steps.detect-package-manager.outputs.runner }} next build
               env:
                   TOP_PROGRESS: ${{ secrets.TOP_PROGRESS }}
+                  NEXT_PUBLIC_HOME_PAGE: ${{ secrets.NEXT_PUBLIC_HOME_PAGE }}
 
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
