@@ -6,8 +6,6 @@ import { Fragment } from "react";
 import LinkTo from "../link";
 import { useGlobalContext } from "@/context/store";
 
-const HOME_PAGE = process.env.NEXT_PUBLIC_HOME_PAGE;
-
 const userMenu = [
     {
         _id: "lu1",
@@ -102,7 +100,7 @@ export function ListMenuLeft() {
                         >
                             <Avatar
                                 alt="user-avatar"
-                                src={`${HOME_PAGE}/see.me-light.svg`}
+                                src={`see.me-light.svg`}
                                 size="lg"
                                 sx={{
                                     bgcolor: chooseThemeColorIn(color.white.lightSub, color.white.main, systemMode),

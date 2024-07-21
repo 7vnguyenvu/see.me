@@ -9,7 +9,7 @@ export function useDynamicFavicon() {
     useLayoutEffect(() => {
         const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
         if (favicon) {
-            favicon.href = mode === "dark" ? `${HOME_PAGE}/see.me-dark.svg` : `${HOME_PAGE}/see.me-light.svg`;
+            favicon.href = mode === "dark" ? `see.me-dark.svg` : `see.me-light.svg`;
             favicon.type = "image/svg+xml";
         }
     }, [mode]);
