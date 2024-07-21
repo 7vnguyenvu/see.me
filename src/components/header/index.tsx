@@ -11,6 +11,8 @@ import { useState } from "react";
 
 type AnchorMenuPos = "left" | "right";
 
+const HOME_PAGE = process.env.NEXT_PUBLIC_HOME_PAGE;
+
 export function Header() {
     const { systemMode } = useGlobalContext();
 
@@ -74,7 +76,7 @@ export function Header() {
                 >
                     <Avatar
                         alt="user-avatar"
-                        src={`see.me-light.svg`}
+                        src={`${HOME_PAGE}/see.me-light.svg`}
                         size="sm"
                         sx={{ bgcolor: chooseThemeColorIn(color.white.lightSub, color.white.main, systemMode) }}
                     />
@@ -95,7 +97,10 @@ export function Header() {
                 <KeyboardDoubleArrowRight sx={{ mt: 1, display: { xs: "none", sm: "inline-block" } }} />
                 <LinkTo url="/">
                     <Box sx={{ height: `${(2 / 3) * HEADER_HEIGHT}px`, img: { width: "auto", height: "100%" } }}>
-                        <img src={chooseThemeImageIn(`see.me-text-light.svg`, `see.me-text-dark.svg`, systemMode)} alt="see.me-text-logo.svg" />
+                        <img
+                            src={chooseThemeImageIn(`${HOME_PAGE}/see.me-text-light.svg`, `${HOME_PAGE}/see.me-text-dark.svg`, systemMode)}
+                            alt="see.me-text-logo.svg"
+                        />
                     </Box>
                 </LinkTo>
                 <KeyboardDoubleArrowLeft sx={{ mt: 1 }} />
@@ -141,7 +146,7 @@ export function Header() {
                     >
                         <Avatar
                             alt="user-avatar"
-                            src={`see.me-light.svg`}
+                            src={`${HOME_PAGE}/see.me-light.svg`}
                             size="sm"
                             sx={{ bgcolor: chooseThemeColorIn(color.white.lightSub, color.white.main, systemMode) }}
                         />
