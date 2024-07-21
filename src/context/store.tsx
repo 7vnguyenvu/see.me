@@ -37,7 +37,7 @@ export function GlobalContextProvider({ children, lang }: { children: React.Reac
     const storedToken = typeof localStorage !== "undefined" ? localStorage.getItem("access-token") : null;
     const [pageSave, setPageSave] = useState<PageSave | null>({
         prev: "",
-        curr: typeof location !== "undefined" ? location.href.substring(`${location.origin}/${lang}/`.length) || "/" : "",
+        curr: typeof location !== "undefined" ? location.href.substring(location.href.indexOf(`/${lang}`) + lang.length + 1) || "/" : "",
     });
     const [token, setToken] = useState<string | null>(storedToken);
 
