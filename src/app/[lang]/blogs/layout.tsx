@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     return {
         title: {
-            default: T.page.title,
+            default: T.head.title,
             template: `%s - [ SEE . ME ]`,
         },
     };

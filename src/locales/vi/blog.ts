@@ -1,5 +1,5 @@
 const defaultExport = {
-    page: {
+    head: {
         title: "Bài viết & Nhật ký",
     },
 };

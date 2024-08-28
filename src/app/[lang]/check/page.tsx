@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckEn, CheckVi } from "@/locales";
 import { Header, Main, Main_Container } from "@/components";
 
 import { useGlobalContext } from "@/context/store";
@@ -11,6 +12,7 @@ import { useSystemColorMode } from "@/hooks";
 
 export default function Home() {
     const { lang } = useGlobalContext();
+    const T = lang === "en" ? CheckEn : CheckVi;
     // const { mode } = useColorScheme();
     const systemMode = useSystemColorMode();
 
@@ -32,10 +34,14 @@ export default function Home() {
             <Main>
                 <Main_Container>
                     {/* <h1>Chế độ hiện tại [mode]: {mode}</h1> */}
-                    <h1>Chế độ hệ thống [systemMode]: {systemMode}</h1>
-                    <h4>Tự động thay đổi theo cài đặt hệ thống.</h4>
+                    <h1>
+                        {T.contents.systemMode} [systemMode]: {systemMode}
+                    </h1>
+                    <h4>{T.contents.note_AutoChange}</h4>
                     <hr style={{ borderTop: "1px dashed #ccc" }} />
-                    <p>Ngôn ngữ đang chọn [lang]: {lang}</p>
+                    <p>
+                        {T.contents.languageSelected} [lang]: {lang}
+                    </p>
                 </Main_Container>
             </Main>
         </div>
