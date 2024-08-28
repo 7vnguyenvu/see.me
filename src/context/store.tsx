@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, createContext, useCallback, useContext, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, createContext, useCallback, useContext, useState } from "react";
 import { useDynamicFavicon, useSystemColorMode } from "@/hooks";
 
 import { ApolloProvider } from "@apollo/client";
@@ -65,12 +65,6 @@ export function GlobalContextProvider({ children, lang }: { children: React.Reac
         [pageSave]
     );
 
-    // DÒNG LOG CHECK -> XÓA SAU
-    // useEffect(() => {
-    //     console.log("[Store] Render lần:", ++countReRender);
-    //     console.log("Page-save:", pageSave);
-    // }, [pageSave]);
-
     const context = {
         systemMode,
         lang,
@@ -89,7 +83,7 @@ export function GlobalContextProvider({ children, lang }: { children: React.Reac
 }
 
 export function useGlobalContext() {
+    const context = useContext(GlobalContext);
     useDynamicFavicon();
-
-    return useContext(GlobalContext);
+    return context;
 }
