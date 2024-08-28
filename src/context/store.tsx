@@ -66,10 +66,10 @@ export function GlobalContextProvider({ children, lang }: { children: React.Reac
     );
 
     // DÒNG LOG CHECK -> XÓA SAU
-    useEffect(() => {
-        console.log("[Store] Render lần:", ++countReRender);
-        console.log("Page-save:", pageSave);
-    }, [pageSave]);
+    // useEffect(() => {
+    //     console.log("[Store] Render lần:", ++countReRender);
+    //     console.log("Page-save:", pageSave);
+    // }, [pageSave]);
 
     const context = {
         systemMode,

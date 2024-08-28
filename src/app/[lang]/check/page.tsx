@@ -1,6 +1,6 @@
 "use client";
 
-import { Header, MD_PADDING, Main } from "@/components";
+import { Header, Main, Main_Container } from "@/components";
 
 import { useGlobalContext } from "@/context/store";
 import { useSystemColorMode } from "@/hooks";
@@ -29,16 +29,14 @@ export default function Home() {
     return (
         <div>
             <Header />
-            <Main
-                sx={{
-                    px: { md: `${MD_PADDING}px` },
-                }}
-            >
-                {/* <h1>Chế độ hiện tại [mode]: {mode}</h1> */}
-                <h1>Chế độ hệ thống [systemMode]: {systemMode}</h1>
-                <h4>Tự động thay đổi theo cài đặt hệ thống.</h4>
-                <hr style={{ borderTop: "1px dashed #ccc" }} />
-                <p>Ngôn ngữ đang chọn [lang]: {lang}</p>
+            <Main>
+                <Main_Container>
+                    {/* <h1>Chế độ hiện tại [mode]: {mode}</h1> */}
+                    <h1>Chế độ hệ thống [systemMode]: {systemMode}</h1>
+                    <h4>Tự động thay đổi theo cài đặt hệ thống.</h4>
+                    <hr style={{ borderTop: "1px dashed #ccc" }} />
+                    <p>Ngôn ngữ đang chọn [lang]: {lang}</p>
+                </Main_Container>
             </Main>
         </div>
     );

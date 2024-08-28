@@ -1,6 +1,6 @@
 "use client";
 
-import { Header, MD_PADDING, Main } from "@/components";
+import { Header, Main, Main_Container } from "@/components";
 
 import { Fragment } from "react";
 import { useGlobalContext } from "@/context/store";
@@ -11,8 +11,10 @@ export default function Page() {
     return (
         <Fragment>
             <Header />
-            <Main sx={{ px: { md: `${MD_PADDING}px` } }}>
-                <h1>HOME PAGE</h1>
+            <Main>
+                <Main_Container>
+                    <h1>HOME PAGE</h1>
+                </Main_Container>
             </Main>
         </Fragment>
     );
