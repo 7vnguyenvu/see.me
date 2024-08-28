@@ -8,14 +8,14 @@ const HOME_PAGE = process.env.NEXT_PUBLIC_HOME_PAGE;
 
 const langs = [
     {
-        locale: "vi",
-        text: "Vietnamese",
-        flag: "locales/vietnam-flag.jpg",
+        locale: "en",
+        text: "English (UK)",
+        flag: "locales/england-flag.jpg",
     },
     {
-        locale: "en",
-        text: "English",
-        flag: "locales/england-flag.jpg",
+        locale: "vi",
+        text: "Việt Nam",
+        flag: "locales/vietnam-flag.jpg",
     },
 ];
 
