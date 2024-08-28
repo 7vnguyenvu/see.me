@@ -6,13 +6,16 @@ export const XS_PADDING = 8;
 export const HEADER_HEIGHT = 60;
 
 export const color = {
+    pink_Of_Nhi: {
+        main: "#ef81c0",
+    },
     header: {
         light: "#ffffff",
         dark: "#272727",
     },
     primary: {
         light: "#ff7961",
-        main: "#ba000d",
+        main: "#f31d59",
         dark: "#5f0a0c",
         darkSub: "#430708",
         contrastText: "#ffffff",

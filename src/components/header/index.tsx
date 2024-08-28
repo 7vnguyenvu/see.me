@@ -44,6 +44,7 @@ export function Header() {
                 top: 0,
                 left: 0,
                 right: 0,
+                zIndex: 1299, // < Modal Drawer z-index: 1300
                 height: `${HEADER_HEIGHT}px`,
                 pb: 1,
                 px: { xs: `${MD_PADDING}px` },
