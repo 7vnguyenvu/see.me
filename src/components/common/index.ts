@@ -44,6 +44,7 @@ export const color = {
         light: "#eeeeee",
         main: "#000000",
         dark: "#272727",
+        sub: "#7a7a7a",
         contrastText: "#ffffff",
     },
     pink: {
@@ -62,10 +63,6 @@ export const color = {
     transparent: "transparent",
 };
 
-export const chooseThemeColorIn = (hexLight: string, hexDark: string, systemMode: "light" | "dark"): string => {
-    return systemMode === "light" ? hexLight : hexDark;
-};
-
-export const chooseThemeImageIn = (urlLight: string, urlDark: string, systemMode: "light" | "dark"): string => {
-    return systemMode === "light" ? urlLight : urlDark;
+export const chooseThemeValueIn = (valueForLightTheme: string, valueForDarkTheme: string, systemMode: "light" | "dark"): string => {
+    return systemMode === "light" ? valueForLightTheme : valueForDarkTheme;
 };

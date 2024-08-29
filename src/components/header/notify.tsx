@@ -1,7 +1,7 @@
 import { Badge, Box, Chip, Dropdown, IconButton, ListDivider, ListItemDecorator, Menu, MenuButton, MenuItem, Stack, Typography } from "@mui/joy";
 import { Campaign, Circle, Notifications } from "@mui/icons-material";
 import { Fragment, useState } from "react";
-import { chooseThemeColorIn, color } from "..";
+import { chooseThemeValueIn, color } from "..";
 
 import LinkTo from "../link";
 import { timePassed } from "@/utils";
@@ -139,7 +139,7 @@ export default function NotiFy() {
 
 function NotiFyItem({ activator, content, timepass, seen }: NotiFyItem_Props) {
     const { lang, systemMode } = useGlobalContext();
-    const colorActive = seen ? color.white.sub : chooseThemeColorIn(color.black.main, color.white.lightSub, systemMode);
+    const colorActive = seen ? color.white.sub : chooseThemeValueIn(color.black.main, color.white.lightSub, systemMode);
 
     return (
         <MenuItem>

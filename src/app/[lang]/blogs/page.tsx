@@ -6,7 +6,10 @@ import { Header, Main, Main_Container, TopPage } from "@/components";
 import { Fragment } from "react";
 import { useGlobalContext } from "@/context/store";
 
-const imageTopURL = "see.me-dark.svg";
+const imageTopURL = {
+    light: "see.me-light.svg",
+    dark: "see.me-dark.svg",
+};
 
 export default function Page() {
     const { lang } = useGlobalContext();

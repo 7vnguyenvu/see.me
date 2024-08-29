@@ -1,9 +1,10 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/joy";
-import { MD_PADDING, XS_PADDING, color } from "@/components";
+import { MD_PADDING, XS_PADDING, chooseThemeValueIn, color } from "@/components";
 
 import { FaPenNib } from "react-icons/fa";
+import { useGlobalContext } from "@/context/store";
 
 const HEIGHT = {
     xs: 160,
@@ -12,7 +13,10 @@ const HEIGHT = {
 
 interface Props {
     bgcolor?: string;
-    image: string;
+    image: {
+        light: string;
+        dark: string;
+    };
     title: string;
     description: {
         xs: string;
@@ -21,13 +25,19 @@ interface Props {
 }
 
 export function TopPage({ bgcolor, image, title, description }: Props) {
+    const { systemMode } = useGlobalContext();
+
     return (
         <Box sx={{ position: "relative" }}>
             <Box
                 sx={{
                     position: "relative",
                     height: { xs: `${HEIGHT.xs}px`, md: `${HEIGHT.md}px` },
-                    backgroundImage: `linear-gradient(70deg, ${bgcolor || color.primary.main}, ${color.black.dark});`,
+                    backgroundImage: `linear-gradient(70deg, ${bgcolor || color.primary.main}, ${chooseThemeValueIn(
+                        color.white.main,
+                        color.black.dark,
+                        systemMode
+                    )});`,
                     my: { xs: `${XS_PADDING}px`, md: `${MD_PADDING}px` },
                     p: { xs: `${XS_PADDING}px`, md: `${MD_PADDING}px` },
                     borderRadius: "md",
@@ -35,7 +45,7 @@ export function TopPage({ bgcolor, image, title, description }: Props) {
 
                     "&:after": {
                         content: '""',
-                        backgroundImage: `linear-gradient(200deg, #00000000, ${color.black.dark});`,
+                        backgroundImage: `linear-gradient(200deg, #00000000, ${chooseThemeValueIn(color.white.main, color.black.dark, systemMode)});`,
                         position: "absolute",
                         top: "0",
                         right: "0",
@@ -56,7 +66,7 @@ export function TopPage({ bgcolor, image, title, description }: Props) {
                         },
                     }}
                 >
-                    <img src={`../${image}`} alt="see.me logo" />
+                    <img src={`../${image[systemMode]}`} alt="see.me logo" />
                 </Box>
             </Box>
 
@@ -68,21 +78,26 @@ export function TopPage({ bgcolor, image, title, description }: Props) {
                     bottom: { xs: "8%", sm: "8%", md: "12%" },
                 }}
             >
-                <Typography level="h1" textTransform={"uppercase"} sx={{ bgcolor: "#", svg: { fontSize: "2rem" } }}>
+                <Typography
+                    level="h1"
+                    textTransform={"uppercase"}
+                    textColor={chooseThemeValueIn(color.black.dark, color.white.cream, systemMode)}
+                    sx={{ bgcolor: "#", svg: { fontSize: "2rem" } }}
+                >
                     {title} ..
                     <FaPenNib />
                 </Typography>
 
                 <Typography
                     level="body-xs"
-                    textColor={color.white.cream}
+                    textColor={chooseThemeValueIn(color.black.sub, color.white.sub, systemMode)}
                     sx={{ width: "100%", display: { xs: "none", sm: "block" }, whiteSpace: "pre-wrap" }}
                 >
                     {description.md}
                 </Typography>
                 <Typography
                     level="body-xs"
-                    textColor={color.white.cream}
+                    textColor={chooseThemeValueIn(color.black.sub, color.white.sub, systemMode)}
                     sx={{ width: "100%", display: { xs: "block", sm: "none" }, whiteSpace: "pre-wrap" }}
                 >
                     {description.xs}

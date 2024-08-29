@@ -1,5 +1,5 @@
 import { Avatar, Box, Drawer, ModalClose, Stack, Typography } from "@mui/joy";
-import { HEADER_HEIGHT, MD_PADDING, chooseThemeColorIn, chooseThemeImageIn, color } from "..";
+import { HEADER_HEIGHT, MD_PADDING, chooseThemeValueIn, color } from "..";
 import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, Menu as MenuIcon } from "@mui/icons-material";
 
 import Languages from "./language";
@@ -39,7 +39,8 @@ export function Header() {
         <Stack
             direction={"row"}
             sx={{
-                bgcolor: chooseThemeColorIn(color.header.light, color.header.dark, systemMode),
+                bgcolor: chooseThemeValueIn(color.header.light, color.header.dark, systemMode),
+                boxShadow: chooseThemeValueIn(`0 2px 8px ${color.white.lightSub}`, "none", systemMode),
                 position: "fixed",
                 top: 0,
                 left: 0,
@@ -79,7 +80,7 @@ export function Header() {
                         alt="user-avatar"
                         src={`${HOME_PAGE}/see.me-light.svg`}
                         size="sm"
-                        sx={{ bgcolor: chooseThemeColorIn(color.white.lightSub, color.white.main, systemMode) }}
+                        sx={{ bgcolor: chooseThemeValueIn(color.white.lightSub, color.white.main, systemMode) }}
                     />
                 </Box>
                 <Typography sx={{ display: { sm: "none", md: "block" }, fontWeight: "bold" }}>7V NGUYEN VU</Typography>
@@ -99,7 +100,7 @@ export function Header() {
                 <LinkTo url="/">
                     <Box sx={{ height: `${(2 / 3) * HEADER_HEIGHT}px`, img: { width: "auto", height: "100%" } }}>
                         <img
-                            src={chooseThemeImageIn(`${HOME_PAGE}/see.me-text-light.svg`, `${HOME_PAGE}/see.me-text-dark.svg`, systemMode)}
+                            src={chooseThemeValueIn(`${HOME_PAGE}/see.me-text-light.svg`, `${HOME_PAGE}/see.me-text-dark.svg`, systemMode)}
                             alt="see.me-text-logo.svg"
                         />
                     </Box>
@@ -149,7 +150,7 @@ export function Header() {
                             alt="user-avatar"
                             src={`${HOME_PAGE}/see.me-light.svg`}
                             size="sm"
-                            sx={{ bgcolor: chooseThemeColorIn(color.white.lightSub, color.white.main, systemMode) }}
+                            sx={{ bgcolor: chooseThemeValueIn(color.white.lightSub, color.white.main, systemMode) }}
                         />
                     </Box>
                 </Stack>

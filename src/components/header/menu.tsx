@@ -1,6 +1,6 @@
 import { Avatar, Box, Divider, List, ListItem, ListItemButton, Stack, Typography } from "@mui/joy";
 import { CategoryRounded, HistoryEduRounded, HomeRounded, NearMe, SportsEsports, VisibilityRounded } from "@mui/icons-material";
-import { chooseThemeColorIn, color } from "..";
+import { chooseThemeValueIn, color } from "..";
 
 import { Fragment } from "react";
 import LinkTo from "../link";
@@ -105,7 +105,7 @@ export function ListMenuLeft() {
                                 src={`${HOME_PAGE}/see.me-light.svg`}
                                 size="lg"
                                 sx={{
-                                    bgcolor: chooseThemeColorIn(color.white.lightSub, color.white.main, systemMode),
+                                    bgcolor: chooseThemeValueIn(color.white.lightSub, color.white.main, systemMode),
                                 }}
                             />
                         </Box>
