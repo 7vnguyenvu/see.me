@@ -35,12 +35,12 @@ export default function Home() {
                 <Main_Container>
                     {/* <h1>Chế độ hiện tại [mode]: {mode}</h1> */}
                     <h1>
-                        {T.contents.systemMode} [systemMode]: {systemMode}
+                        {T.page.systemMode} [systemMode]: {systemMode}
                     </h1>
-                    <h4>{T.contents.note_AutoChange}</h4>
+                    <h4>{T.page.note_AutoChange}</h4>
                     <hr style={{ borderTop: "1px dashed #ccc" }} />
                     <p>
-                        {T.contents.languageSelected} [lang]: {lang}
+                        {T.page.languageSelected} [lang]: {lang}
                     </p>
                 </Main_Container>
             </Main>

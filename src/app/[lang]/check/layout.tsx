@@ -1,4 +1,4 @@
-import { BlogsEn, BlogsVi } from "@/locales";
+import { CheckEn, CheckVi } from "@/locales";
 
 import type { Metadata } from "next";
 
@@ -8,11 +8,11 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const lang = params.lang || "en";
-    const T = lang === "en" ? BlogsEn : BlogsVi;
+    const T = lang === "en" ? CheckEn : CheckVi;
 
     return {
         title: T.head.title,
-        description: `Nơi SEE.ME chia sẻ về những bài học từ hành trình cá nhân, đôi khi là những nốt thăng trầm trong cuộc sống!`,
+        description: `Kiểm toán chất lượng trạng thái và các thông tin khác của UI -> Hướng đến trải nghiệm tốt nhất.`,
     };
 }
 

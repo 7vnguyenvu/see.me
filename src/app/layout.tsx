@@ -5,6 +5,8 @@ export const metadata: Metadata = {
     icons: {
         icon: "see.me-dark.svg", // Default
     },
+    title: "[ SEE . ME ]",
+    description: `SEE.ME - Điểm hẹn của cảm hứng và trải nghiệm, khám phá góc nhìn mới, kết nối với những tâm hồn đồng điệu trên hành trình khám phá bản thân.`,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

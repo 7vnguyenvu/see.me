@@ -1,8 +1,8 @@
 const defaultExport = {
     head: {
-        title: "",
+        title: "Hệ thống",
     },
-    contents: {
+    page: {
         systemMode: "Chủ đề hệ thống",
         note_AutoChange: "Tự động thay đổi theo cài đặt hệ thống.",
         languageSelected: "Ngôn ngữ hiện đang được chọn",
