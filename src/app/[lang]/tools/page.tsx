@@ -1,10 +1,9 @@
 "use client";
 
 import { Breadcrumb, Header, ImageGetter_Tools, Main, Main_Container, TopPage, color } from "@/components";
-import { FaPenNib, FaToolbox } from "react-icons/fa";
 import { ToolEn, ToolVi } from "@/locales";
 
-import { Box } from "@mui/joy";
+import { FaToolbox } from "react-icons/fa";
 import { Fragment } from "react";
 import { Grid } from "@mui/material";
 import { useGlobalContext } from "@/context/store";
@@ -36,30 +35,10 @@ export default function Page() {
                         }
                     />
                     {/* BREADCRUMB */}
-                    <Breadcrumb />
+                    <Breadcrumb currentText={T.page.title.md} />
                     {/* BODY */}
                     <Grid container spacing={{ xs: 1, md: 1 }} sx={{ flexGrow: 1 }}>
                         {/* Image Geter */}
-                        <Grid item xs={12} sm={6} md={3} lg={2}>
-                            <ImageGetter_Tools lang={lang} />
-                        </Grid>
-                        {/* ............ */}
-                        <Grid item xs={12} sm={6} md={3} lg={2}>
-                            <ImageGetter_Tools lang={lang} />
-                        </Grid>
-                        {/* ............ */}
-                        <Grid item xs={12} sm={6} md={3} lg={2}>
-                            <ImageGetter_Tools lang={lang} />
-                        </Grid>
-                        {/* ............ */}
-                        <Grid item xs={12} sm={6} md={3} lg={2}>
-                            <ImageGetter_Tools lang={lang} />
-                        </Grid>
-                        {/* ............ */}
-                        <Grid item xs={12} sm={6} md={3} lg={2}>
-                            <ImageGetter_Tools lang={lang} />
-                        </Grid>
-                        {/* ............ */}
                         <Grid item xs={12} sm={6} md={3} lg={2}>
                             <ImageGetter_Tools lang={lang} />
                         </Grid>

@@ -8,7 +8,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const lang = params.lang || "en";
-    const T = lang === "en" ? ToolEn : ToolVi;
+    const T = lang === "en" ? ToolEn.imageGetter : ToolVi.imageGetter;
 
     return {
         title: T.head.title,

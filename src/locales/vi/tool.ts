@@ -15,6 +15,37 @@ Hỗ trợ bạn hiệu quả nhất!`,
 Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc và học tập hiệu quả nhất.`,
         },
     },
+    imageGetter: {
+        name: "Trình thu thập Ảnh",
+        head: {
+            title: "Lấy ảnh qua URLs",
+            description: "Công cụ hỗ trợ lấy ảnh nhanh từ URL - Lấy ảnh theo danh sách một cách nhanh chống và hiệu quả.",
+        },
+        page: {
+            title: {
+                xs: `Danh sách URL`,
+                md: `Tải ảnh từ danh sách URL của bạn`,
+            },
+            textAreaPlaceholder: "Nhập danh sách URL ảnh, mỗi dòng là một URL",
+            folderNameLabel: "Đặt tên cho file chứa",
+            folderNamePlaceholder: "Ví dụ: Danh sách ảnh",
+            progressLabel: "Đang tìm ảnh…",
+            handleDownloadImages: {
+                missingImage: "Không có ảnh hợp lệ để tải.",
+                missingFolderName: "Vui lòng nhập tên thư mục.",
+                errorDownloading: "Lỗi khi tải hình ảnh",
+            },
+            checkValidImagesFail: "Lỗi khi tải hình ảnh:",
+            analytics: {
+                total: "Tổng số URL",
+                success: "URL tìm thấy",
+                fail: "URL lỗi",
+            },
+            buttonClear: "Làm mới",
+            buttonDownloadAll: "Tải tất cả",
+            buttonDownload: "Tải ảnh này",
+        },
+    },
 };
 
 export default defaultExport;

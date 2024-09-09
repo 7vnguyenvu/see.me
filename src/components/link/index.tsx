@@ -12,7 +12,7 @@ const LinkTo = ({ url, sx, children }: Props) => {
     const { lang, handleClickLinkTo } = useGlobalContext();
 
     return (
-        <Link onClick={() => handleClickLinkTo(url)} href={`/${lang}/${url}`} style={{ ...sx }}>
+        <Link onClick={() => handleClickLinkTo(url)} href={`/${lang}/${url}`} style={{ textDecoration: "none", ...sx }}>
             {children}
         </Link>
     );

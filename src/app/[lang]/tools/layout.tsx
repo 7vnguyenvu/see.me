@@ -11,7 +11,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const T = lang === "en" ? ToolEn : ToolVi;
 
     return {
-        title: T.head.title,
+        title: {
+            default: T.head.title,
+            template: "%s -- [ SEE . ME ]",
+        },
         description: T.head.description,
     };
 }
