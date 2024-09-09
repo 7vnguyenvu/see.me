@@ -16,6 +16,7 @@
     "@mui/joy": "^5.0.0-beta.48",
     "@mui/material": "^5.16.1",
     "apollo-link-ws": "^1.0.20",
+    "jszip": "^3.10.1",
     "next": "14.2.4",
     "nextjs-toploader": "^1.6.12",
     "react": "^18",

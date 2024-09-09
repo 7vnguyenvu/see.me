@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/joy";
-import { MD_PADDING, XS_PADDING, chooseThemeValueIn, color } from "@/components";
+import { BreakpointProps, MD_PADDING, XS_PADDING, chooseThemeValueIn, color } from "@/components";
 
-import { FaPenNib } from "react-icons/fa";
+import { ReactElement } from "react";
 import { useGlobalContext } from "@/context/store";
 
 const HEIGHT = {
@@ -13,18 +13,16 @@ const HEIGHT = {
 
 interface Props {
     bgcolor?: string;
+    afterTitle?: ReactElement;
     image: {
         light: string;
         dark: string;
     };
-    title: string;
-    description: {
-        xs: string;
-        md: string;
-    };
+    title: BreakpointProps;
+    description: BreakpointProps;
 }
 
-export function TopPage({ bgcolor, image, title, description }: Props) {
+export function TopPage({ bgcolor, image, title, description, afterTitle }: Props) {
     const { systemMode } = useGlobalContext();
 
     return (
@@ -82,10 +80,17 @@ export function TopPage({ bgcolor, image, title, description }: Props) {
                     level="h1"
                     textTransform={"uppercase"}
                     textColor={chooseThemeValueIn(color.black.dark, color.white.cream, systemMode)}
-                    sx={{ bgcolor: "#", svg: { fontSize: "2rem" } }}
+                    sx={{ bgcolor: "#", svg: { fontSize: "2rem" }, display: { xs: "none", sm: "block" } }}
                 >
-                    {title} ..
-                    <FaPenNib />
+                    {title.md} {afterTitle}
+                </Typography>
+                <Typography
+                    level="h1"
+                    textTransform={"uppercase"}
+                    textColor={chooseThemeValueIn(color.black.dark, color.white.cream, systemMode)}
+                    sx={{ bgcolor: "#", svg: { fontSize: "2rem" }, display: { xs: "block", sm: "none" } }}
+                >
+                    {title.xs} {afterTitle}
                 </Typography>
 
                 <Typography

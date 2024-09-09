@@ -3,7 +3,10 @@ const defaultExport = {
         title: "Blogs & Diaries",
     },
     page: {
-        title: "Articles",
+        title: {
+            xs: `Articles`,
+            md: `Articles & Diaries`,
+        },
         description: {
             xs: `[ SEE . ME ]
 Journey and Life!`,

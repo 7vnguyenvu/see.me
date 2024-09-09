@@ -3,7 +3,10 @@ const defaultExport = {
         title: "Bài viết & Nhật ký",
     },
     page: {
-        title: "Bài viết",
+        title: {
+            xs: "Bài viết",
+            md: "Bài viết & Nhật ký",
+        },
         description: {
             xs: `[ SEE . ME ]
 Hành trình và Cuộc sống!`,

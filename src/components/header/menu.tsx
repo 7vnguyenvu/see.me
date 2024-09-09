@@ -22,6 +22,12 @@ const userMenu = [
         iconMUI: "HistoryEduRounded",
     },
     {
+        _id: "lu6",
+        url: "tools",
+        name: "Công cụ & Dịch vụ",
+        iconMUI: "HistoryEduRounded",
+    },
+    {
         _id: "lu3",
         url: "entertaimemts",
         name: "Trung tâm giải trí",

@@ -3,7 +3,13 @@ import { HEADER_HEIGHT, MD_PADDING, XS_PADDING } from "..";
 
 import { SxProps } from "@mui/material";
 
+export interface BreakpointProps {
+    xs?: string;
+    md?: string;
+}
+
 export * from "./top-page";
+export * from "./breadcrumb";
 
 // Main Area
 export const Main = styled(Box)({
