@@ -160,14 +160,14 @@ export default function Page() {
                     <Box sx={{ width: { xs: "inherit", md: "80%", lg: "70%" }, my: 2, mx: "auto" }}>
                         <Typography
                             level="h1"
-                            textColor={chooseThemeValueIn(color.white.cream, color.black.dark, systemMode)}
+                            textColor={chooseThemeValueIn(color.black.dark, color.black.dark, systemMode)}
                             sx={{ bgcolor: "#", svg: { fontSize: "2rem" }, display: { xs: "none", sm: "block" } }}
                         >
                             {T.page.title.md}
                         </Typography>
                         <Typography
                             level="h1"
-                            textColor={chooseThemeValueIn(color.white.cream, color.black.dark, systemMode)}
+                            textColor={chooseThemeValueIn(color.black.dark, color.black.dark, systemMode)}
                             sx={{ bgcolor: "#", svg: { fontSize: "2rem" }, display: { xs: "block", sm: "none" } }}
                         >
                             {T.page.title.xs}
