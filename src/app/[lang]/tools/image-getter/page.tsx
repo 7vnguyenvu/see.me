@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, LinearProgress, Stack, Typography } from "@mui/joy";
+import { Box, Button, Divider, LinearProgress, Stack, Typography } from "@mui/joy";
 import { Breadcrumb, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
 import { Download, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
@@ -339,6 +339,7 @@ export default function Page() {
                                             </Grid>
                                         ))}
                                     </Grid>
+                                    <Divider sx={{ my: 2 }}>{T.page.showEnd}</Divider>
                                 </Grid>
                             )}
                         </Grid>

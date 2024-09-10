@@ -44,6 +44,7 @@ Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc v
             buttonClear: "Làm mới",
             buttonDownloadAll: "Tải tất cả",
             buttonDownload: "Tải ảnh này",
+            showEnd: "Tất cả kết quả đã được hiển thị!",
         },
     },
 };

@@ -45,6 +45,7 @@ Share features and services to support you in your work and study most effective
             buttonClear: "Refresh",
             buttonDownloadAll: "Download all",
             buttonDownload: "Download this image",
+            showEnd: "All results shown!",
         },
     },
 };
