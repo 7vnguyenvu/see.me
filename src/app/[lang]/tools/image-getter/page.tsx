@@ -112,12 +112,21 @@ export default function Page() {
         const zip = new JSZip();
         const folder = zip.folder(folderName);
 
-        const promises = validImages.map((url) => {
+        const promises = validImages.map((url, index) => {
             return fetch(url)
                 .then((response) => response.blob())
                 .then((blob) => {
-                    const urlParts = url.split("/");
-                    let fileName = urlParts[urlParts.length - 1];
+                    // Lấy tên file từ URL
+                    let fileName = url.split("/").pop() || `image-${index}.jpg`;
+
+                    // Loại bỏ chuỗi sau phần mở rộng ảnh (.jpg, .png, .webp, ...)
+                    const regex = /(\.jpg|\.jpeg|\.png|\.webp|\.gif|\.bmp|\.tiff)(\?.*)?$/i;
+                    const match = fileName.match(regex);
+
+                    if (match) {
+                        // Chỉ giữ lại phần trước và bao gồm phần mở rộng
+                        fileName = fileName.substring(0, fileName.indexOf(match[0]) + match[1].length);
+                    }
 
                     // Convert .webp to .jpg
                     if (fileName.endsWith(".webp")) {
@@ -305,7 +314,6 @@ export default function Page() {
                                                         }}
                                                     />
 
-                                                    {/* Nút tải ngay */}
                                                     <Button
                                                         variant="solid"
                                                         color="primary"
@@ -321,9 +329,22 @@ export default function Page() {
                                                             try {
                                                                 const response = await fetch(imageUrl);
                                                                 const blob = await response.blob();
+
+                                                                // Lấy tên file từ URL và loại bỏ chuỗi truy vấn sau phần mở rộng
+                                                                let fileName = imageUrl.split("/").pop() || `image-${index}.jpg`;
+
+                                                                // Loại bỏ chuỗi sau phần mở rộng ảnh (nếu có)
+                                                                const regex = /(\.jpg|\.jpeg|\.png|\.webp|\.gif|\.bmp|\.tiff)(\?.*)?$/i;
+                                                                const match = fileName.match(regex);
+
+                                                                if (match) {
+                                                                    // Chỉ giữ lại phần trước và bao gồm phần mở rộng
+                                                                    fileName = fileName.substring(0, fileName.indexOf(match[0]) + match[1].length);
+                                                                }
+
                                                                 const link = document.createElement("a");
                                                                 link.href = URL.createObjectURL(blob);
-                                                                link.download = imageUrl.split("/").pop() || `image-${index}.jpg`; // Tên file download
+                                                                link.download = fileName; // Đặt tên file sau khi loại bỏ chuỗi truy vấn
                                                                 document.body.appendChild(link);
                                                                 link.click();
                                                                 URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
