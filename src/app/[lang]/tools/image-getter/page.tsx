@@ -420,39 +420,40 @@ export default function Page() {
                                                             }}
                                                         />
 
-                                                    {/* Nút tải ngay */}
-                                                    <Button
-                                                        variant="solid"
-                                                        color="primary"
-                                                        size="sm"
-                                                        sx={{
-                                                            position: "absolute",
-                                                            bottom: 0,
-                                                            right: 0,
-                                                            margin: "5px",
-                                                            fontSize: "0.7rem",
-                                                        }}
-                                                        onClick={async () => {
-                                                            try {
-                                                                const response = await fetch(imageUrl);
-                                                                const blob = await response.blob();
-                                                                const link = document.createElement("a");
-                                                                link.href = URL.createObjectURL(blob);
-                                                                link.download = imageUrl.split("/").pop() || `image-${index}.jpg`; // Tên file download
-                                                                document.body.appendChild(link);
-                                                                link.click();
-                                                                URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
-                                                                document.body.removeChild(link);
-                                                            } catch (error) {
-                                                                console.error("Error downloading image:", error);
-                                                            }
-                                                        }}
-                                                    >
-                                                        {T.page.buttonDownload}
-                                                    </Button>
-                                                </Box>
-                                            </Grid>
-                                        ))}
+                                                        {/* Nút tải ngay */}
+                                                        <Button
+                                                            variant="solid"
+                                                            color="primary"
+                                                            size="sm"
+                                                            sx={{
+                                                                position: "absolute",
+                                                                bottom: 0,
+                                                                right: 0,
+                                                                margin: "5px",
+                                                                fontSize: "0.7rem",
+                                                            }}
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const response = await fetch(imageUrl);
+                                                                    const blob = await response.blob();
+                                                                    const link = document.createElement("a");
+                                                                    link.href = URL.createObjectURL(blob);
+                                                                    link.download = imageUrl.split("/").pop() || `image-${index}.jpg`; // Tên file download
+                                                                    document.body.appendChild(link);
+                                                                    link.click();
+                                                                    URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
+                                                                    document.body.removeChild(link);
+                                                                } catch (error) {
+                                                                    console.error("Error downloading image:", error);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Download />
+                                                        </Button>
+                                                    </Box>
+                                                </Grid>
+                                            );
+                                        })}
                                     </Grid>
                                     <Divider sx={{ my: 2 }}>{T.page.showEnd}</Divider>
                                 </Grid>
