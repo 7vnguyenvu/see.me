@@ -44,8 +44,16 @@ Share features and services to support you in your work and study most effective
             },
             buttonClear: "Refresh",
             buttonDownloadAll: "Download all",
-            buttonDownload: "Download this image",
             showEnd: "All results shown!",
+        },
+        modal: {
+            FindImageLinksModal: {
+                handleFindImageLinks_Null: "No image links found.",
+                buttonOpenModalText: "Find URLs in text ⚡",
+                buttonFindText: "Find",
+                titleModal: "Find URLs ⚡",
+                placeholderTextarea: "Paste text containing image links here...",
+            },
         },
     },
 };

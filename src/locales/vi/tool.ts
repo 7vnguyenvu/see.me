@@ -43,8 +43,16 @@ Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc v
             },
             buttonClear: "Làm mới",
             buttonDownloadAll: "Tải tất cả",
-            buttonDownload: "Tải ảnh này",
             showEnd: "Tất cả kết quả đã được hiển thị!",
+        },
+        modal: {
+            FindImageLinksModal: {
+                handleFindImageLinks_Null: "Không tìm thấy link ảnh nào.",
+                buttonOpenModalText: "Tìm URLs trong văn bản ⚡",
+                buttonFindText: "Tìm",
+                titleModal: "Tìm URLs ⚡",
+                placeholderTextarea: "Dán đoạn văn bản có chứa link ảnh vào đây...",
+            },
         },
     },
 };

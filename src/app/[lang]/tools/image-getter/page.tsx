@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Divider, LinearProgress, Stack, Typography } from "@mui/joy";
-import { Breadcrumb, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
+import { Breadcrumb, FindImageLinksModal, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
 import { Download, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
 import { useEffect, useState } from "react";
@@ -58,6 +58,7 @@ export default function Page() {
     const [validImages, setValidImages] = useState<string[]>([]);
     const [progress, setProgress] = useState<number>(0); // State to track progress
     const [errorImages, setErrorImages] = useState<number>(0); // State to track error images
+    const [blobUrls, setBlobUrls] = useState<Record<string, string | null>>({});
 
     // Kiểm tra tính hợp lệ của URL ảnh
     useEffect(() => {
@@ -96,6 +97,35 @@ export default function Page() {
         checkValidImages();
     }, [imageURLs]);
 
+    useEffect(() => {
+        const fetchBlobs = async () => {
+            const newBlobUrls: Record<string, string | null> = {};
+
+            for (const url of validImages) {
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    newBlobUrls[url] = blobUrl;
+                } catch (error) {
+                    // console.error(`Failed to fetch or create URL for image at ${url}`, error);
+                    newBlobUrls[url] = null; // Set to null if there's an error
+                }
+            }
+
+            setBlobUrls(newBlobUrls);
+        };
+
+        fetchBlobs();
+
+        // Clean up blob URLs when the component unmounts
+        return () => {
+            Object.values(blobUrls).forEach((url) => {
+                if (url) URL.revokeObjectURL(url);
+            });
+        };
+    }, [validImages]);
+
     const handleDownloadImages = () => {
         if (validImages.length === 0) {
             setAlert(T.page.handleDownloadImages.missingImage);
@@ -111,6 +141,40 @@ export default function Page() {
 
         const zip = new JSZip();
         const folder = zip.folder(folderName);
+
+        // Kiểu dữ liệu cho usedFileNames để theo dõi các tên file đã sử dụng
+        const usedFileNames: Record<string, boolean> = {};
+
+        // Hàm để cắt ngắn tên file nếu dài hơn 25 ký tự
+        const truncateFileName = (fileName: string): string => {
+            const maxLength = 20;
+            return fileName.length > maxLength ? fileName.substring(0, maxLength) : fileName;
+
+            // if (fileName.length > maxLength) {
+            //     const namePart = fileName.substring(0, maxLength); // Giữ lại phần tên chính
+            //     const extension = fileName.split(".").pop(); // Phần mở rộng
+            //     return `${namePart}...${extension}`; // Thêm dấu ba chấm để chỉ ra tên đã bị cắt ngắn
+            // }
+            // return fileName;
+        };
+
+        // Hàm để lấy tên file duy nhất
+        const getUniqueFileName = (baseFileName: string, dimensions: [number, number]): string => {
+            const [width, height] = dimensions;
+            const truncatedFileName = truncateFileName(baseFileName);
+            let uniqueName = `${truncatedFileName}_${width}x${height}`;
+            let counter = 1;
+
+            // Kiểm tra xem tên file với kích thước đã tồn tại chưa
+            while (usedFileNames[uniqueName]) {
+                uniqueName = `${truncatedFileName}_${width}x${height} (${counter})`;
+                counter++;
+            }
+
+            // Đánh dấu tên file là đã sử dụng
+            usedFileNames[uniqueName] = true;
+            return uniqueName;
+        };
 
         const promises = validImages.map((url, index) => {
             return fetch(url)
@@ -128,13 +192,35 @@ export default function Page() {
                         fileName = fileName.substring(0, fileName.indexOf(match[0]) + match[1].length);
                     }
 
-                    // Convert .webp to .jpg
-                    if (fileName.endsWith(".webp")) {
-                        fileName = fileName.replace(".webp", ".jpg");
+                    // Loại bỏ phần query string (nếu có) từ tên file
+                    fileName = fileName.split("?")[0];
+
+                    // Convert .webp to .jpg, giữ phần mở rộng gốc cho các định dạng khác
+                    const extension = fileName.split(".").pop();
+                    const baseFileName = fileName.split(".").slice(0, -1).join("."); // Loại bỏ phần mở rộng
+
+                    let newFileName = fileName;
+                    if (extension === "webp") {
+                        newFileName = `${baseFileName}.jpg`;
                     }
 
-                    // Add file to folder
-                    folder?.file(fileName, blob);
+                    // Tạo đối tượng URL từ blob để lấy kích thước ảnh
+                    return new Promise<void>((resolve) => {
+                        const img = new Image();
+                        img.src = URL.createObjectURL(blob);
+                        img.onload = () => {
+                            const width = img.width;
+                            const height = img.height;
+                            const dimensions: [number, number] = [width, height];
+
+                            // Đảm bảo tên file không trùng lặp và thêm kích thước (width x height)
+                            const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
+
+                            // Add file vào folder với tên duy nhất
+                            folder?.file(`${uniqueFileName}.${extension === "jpg" ? "jpg" : extension}`, blob);
+                            resolve();
+                        };
+                    });
                 })
                 .catch((error) => console.error(T.page.handleDownloadImages.errorDownloading, error));
         });
@@ -182,14 +268,19 @@ export default function Page() {
                             {T.page.title.xs}
                         </Typography>
 
-                        <Grid container spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1 }}>
+                        <Grid container spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, pt: 4, pb: 1 }}>
+                            {/* Nút tìm link ảnh */}
+                            <Grid item xs={12} md={12}>
+                                <FindImageLinksModal setImageURLs={setImageURLs} />
+                            </Grid>
+
                             <Grid item xs={12} md={12}>
                                 <textarea
                                     value={imageURLs}
                                     onChange={(e) => {
                                         setImageURLs(e.target.value);
                                     }}
-                                    rows={10}
+                                    rows={20}
                                     placeholder={T.page.textAreaPlaceholder}
                                     style={{
                                         width: "100%",
@@ -282,38 +373,54 @@ export default function Page() {
                             {validImages.length > 0 && (
                                 <Grid item xs={12}>
                                     <Grid container spacing={{ xs: 1, md: 1 }} sx={{ flexGrow: 1 }}>
-                                        {validImages.map((imageUrl, index) => (
-                                            <Grid item xs={6} sm={3} md={2} key={index}>
-                                                <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
-                                                    {/* Hiển thị số thứ tự */}
-                                                    <Typography
-                                                        sx={{
-                                                            position: "absolute",
-                                                            top: 0,
-                                                            left: 0,
-                                                            backgroundColor: "rgba(0, 0, 0, 0.6)",
-                                                            color: "white",
-                                                            padding: "2px 5px",
-                                                            borderRadius: "4px",
-                                                            fontWeight: "bold",
-                                                            fontSize: "0.8rem",
-                                                        }}
-                                                    >
-                                                        {index + 1}
-                                                    </Typography>
+                                        {validImages.map((imageUrl, index) => {
+                                            let imgUrl = imageUrl;
 
-                                                    <img
-                                                        src={imageUrl}
-                                                        alt={`preview-${index}`}
-                                                        style={{
-                                                            width: "100%",
-                                                            height: "100%",
-                                                            objectFit: "cover",
-                                                            border: "1px solid #ddd",
-                                                            borderRadius: "4px",
-                                                        }}
-                                                    />
+                                            // Convert .webp to .jpg
+                                            if (imgUrl.endsWith(".webp")) {
+                                                imgUrl = imgUrl.replace(".webp", ".jpg");
+                                            }
 
+                                            // Create a unique URL for each image blob
+                                            const blobUrl = blobUrls[imageUrl] || "";
+
+                                            return (
+                                                <Grid item xs={6} sm={3} md={2} key={index}>
+                                                    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+                                                        {/* Hiển thị số thứ tự */}
+                                                        <Typography
+                                                            sx={{
+                                                                position: "absolute",
+                                                                top: 0,
+                                                                left: 0,
+                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                                                color: "white",
+                                                                padding: "2px 5px",
+                                                                borderRadius: "4px",
+                                                                fontWeight: "bold",
+                                                                fontSize: "0.8rem",
+                                                            }}
+                                                        >
+                                                            {index + 1}
+                                                        </Typography>
+
+                                                        <img
+                                                            src={blobUrl || ""}
+                                                            alt={`preview-${index}`}
+                                                            onError={() => {
+                                                                // Xử lý lỗi tải ảnh
+                                                                console.error(`Failed to load image at ${imgUrl}`);
+                                                            }}
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                objectFit: "cover",
+                                                                border: "1px solid #ddd",
+                                                                borderRadius: "4px",
+                                                            }}
+                                                        />
+
+                                                    {/* Nút tải ngay */}
                                                     <Button
                                                         variant="solid"
                                                         color="primary"
@@ -329,22 +436,9 @@ export default function Page() {
                                                             try {
                                                                 const response = await fetch(imageUrl);
                                                                 const blob = await response.blob();
-
-                                                                // Lấy tên file từ URL và loại bỏ chuỗi truy vấn sau phần mở rộng
-                                                                let fileName = imageUrl.split("/").pop() || `image-${index}.jpg`;
-
-                                                                // Loại bỏ chuỗi sau phần mở rộng ảnh (nếu có)
-                                                                const regex = /(\.jpg|\.jpeg|\.png|\.webp|\.gif|\.bmp|\.tiff)(\?.*)?$/i;
-                                                                const match = fileName.match(regex);
-
-                                                                if (match) {
-                                                                    // Chỉ giữ lại phần trước và bao gồm phần mở rộng
-                                                                    fileName = fileName.substring(0, fileName.indexOf(match[0]) + match[1].length);
-                                                                }
-
                                                                 const link = document.createElement("a");
                                                                 link.href = URL.createObjectURL(blob);
-                                                                link.download = fileName; // Đặt tên file sau khi loại bỏ chuỗi truy vấn
+                                                                link.download = imageUrl.split("/").pop() || `image-${index}.jpg`; // Tên file download
                                                                 document.body.appendChild(link);
                                                                 link.click();
                                                                 URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
