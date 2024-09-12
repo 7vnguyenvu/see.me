@@ -2,7 +2,7 @@
 
 import { Box, Button, Divider, LinearProgress, Stack, Typography } from "@mui/joy";
 import { Breadcrumb, FindImageLinksModal, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
-import { Download, Refresh } from "@mui/icons-material";
+import { Delete, Download, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
 import { useEffect, useState } from "react";
 
@@ -56,6 +56,7 @@ export default function Page() {
     const [alert, setAlert] = useState<string | null>(null);
     const [loadingValidImages, setLoadingValidImages] = useState<boolean>(false);
     const [validImages, setValidImages] = useState<string[]>([]);
+    const [excludedImages, setExcludedImages] = useState<Set<string>>(new Set());
     const [progress, setProgress] = useState<number>(0); // State to track progress
     const [errorImages, setErrorImages] = useState<number>(0); // State to track error images
     const [blobUrls, setBlobUrls] = useState<Record<string, string | null>>({});
@@ -149,13 +150,6 @@ export default function Page() {
         const truncateFileName = (fileName: string): string => {
             const maxLength = 20;
             return fileName.length > maxLength ? fileName.substring(0, maxLength) : fileName;
-
-            // if (fileName.length > maxLength) {
-            //     const namePart = fileName.substring(0, maxLength); // Giữ lại phần tên chính
-            //     const extension = fileName.split(".").pop(); // Phần mở rộng
-            //     return `${namePart}...${extension}`; // Thêm dấu ba chấm để chỉ ra tên đã bị cắt ngắn
-            // }
-            // return fileName;
         };
 
         // Hàm để lấy tên file duy nhất
@@ -176,54 +170,48 @@ export default function Page() {
             return uniqueName;
         };
 
-        const promises = validImages.map((url, index) => {
-            return fetch(url)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    // Lấy tên file từ URL
-                    let fileName = url.split("/").pop() || `image-${index}.jpg`;
+        const promises = validImages
+            .filter((url) => !excludedImages.has(url)) // Lọc ảnh bị loại bỏ
+            .map((url) => {
+                return fetch(url)
+                    .then((response) => response.blob())
+                    .then((blob) => {
+                        const urlParts = url.split("/");
+                        let fileName = urlParts[urlParts.length - 1];
 
-                    // Loại bỏ chuỗi sau phần mở rộng ảnh (.jpg, .png, .webp, ...)
-                    const regex = /(\.jpg|\.jpeg|\.png|\.webp|\.gif|\.bmp|\.tiff)(\?.*)?$/i;
-                    const match = fileName.match(regex);
+                        // Loại bỏ phần query string (nếu có) từ tên file
+                        fileName = fileName.split("?")[0];
 
-                    if (match) {
-                        // Chỉ giữ lại phần trước và bao gồm phần mở rộng
-                        fileName = fileName.substring(0, fileName.indexOf(match[0]) + match[1].length);
-                    }
+                        // Convert .webp to .jpg, giữ phần mở rộng gốc cho các định dạng khác
+                        const extension = fileName.split(".").pop();
+                        const baseFileName = fileName.split(".").slice(0, -1).join("."); // Loại bỏ phần mở rộng
 
-                    // Loại bỏ phần query string (nếu có) từ tên file
-                    fileName = fileName.split("?")[0];
+                        let newFileName = fileName;
+                        if (extension === "webp") {
+                            newFileName = `${baseFileName}.jpg`;
+                        }
 
-                    // Convert .webp to .jpg, giữ phần mở rộng gốc cho các định dạng khác
-                    const extension = fileName.split(".").pop();
-                    const baseFileName = fileName.split(".").slice(0, -1).join("."); // Loại bỏ phần mở rộng
+                        // Tạo đối tượng URL từ blob để lấy kích thước ảnh
+                        return new Promise<void>((resolve) => {
+                            const img = new Image();
+                            img.src = URL.createObjectURL(blob);
+                            img.onload = () => {
+                                const width = img.width;
+                                const height = img.height;
+                                const dimensions: [number, number] = [width, height];
 
-                    let newFileName = fileName;
-                    if (extension === "webp") {
-                        newFileName = `${baseFileName}.jpg`;
-                    }
+                                // Đảm bảo tên file không trùng lặp và thêm kích thước (width x height)
+                                const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
+                                console.log(uniqueFileName);
 
-                    // Tạo đối tượng URL từ blob để lấy kích thước ảnh
-                    return new Promise<void>((resolve) => {
-                        const img = new Image();
-                        img.src = URL.createObjectURL(blob);
-                        img.onload = () => {
-                            const width = img.width;
-                            const height = img.height;
-                            const dimensions: [number, number] = [width, height];
-
-                            // Đảm bảo tên file không trùng lặp và thêm kích thước (width x height)
-                            const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
-
-                            // Add file vào folder với tên duy nhất
-                            folder?.file(`${uniqueFileName}.${extension === "jpg" ? "jpg" : extension}`, blob);
-                            resolve();
-                        };
-                    });
-                })
-                .catch((error) => console.error(T.page.handleDownloadImages.errorDownloading, error));
-        });
+                                // Add file vào folder với tên duy nhất
+                                folder?.file(`${uniqueFileName}.${extension === "jpg" ? "jpg" : extension}`, blob);
+                                resolve();
+                            };
+                        });
+                    })
+                    .catch((error) => console.error(T.page.handleDownloadImages.errorDownloading, error));
+            });
 
         Promise.all(promises).then(() => {
             zip.generateAsync({ type: "blob" }).then((content) => {
@@ -239,6 +227,8 @@ export default function Page() {
         setImageURLs("");
         setFolderName("");
         setValidImages([]); // Xóa luôn danh sách preview
+        setExcludedImages(new Set()); // Xóa tất cả các ảnh bị loại bỏ
+        setBlobUrls({}); // Xóa tất cả các URL blob
         setAlert(null);
         setProgress(0); // Reset progress
         setErrorImages(0); // Reset error images
@@ -381,6 +371,11 @@ export default function Page() {
                                                 imgUrl = imgUrl.replace(".webp", ".jpg");
                                             }
 
+                                            // Check if the image is excluded
+                                            if (excludedImages.has(imageUrl)) {
+                                                return null; // Skip rendering the excluded image
+                                            }
+
                                             // Create a unique URL for each image blob
                                             const blobUrl = blobUrls[imageUrl] || "";
 
@@ -420,6 +415,25 @@ export default function Page() {
                                                             }}
                                                         />
 
+                                                        {/* Nút xóa */}
+                                                        <Button
+                                                            variant="solid"
+                                                            color="danger"
+                                                            size="sm"
+                                                            sx={{
+                                                                position: "absolute",
+                                                                bottom: 0,
+                                                                left: 0,
+                                                                margin: "5px",
+                                                                fontSize: "0.7rem",
+                                                            }}
+                                                            onClick={() => {
+                                                                setExcludedImages((prev) => new Set(prev).add(imageUrl));
+                                                            }}
+                                                        >
+                                                            <Delete />
+                                                        </Button>
+
                                                         {/* Nút tải ngay */}
                                                         <Button
                                                             variant="solid"
@@ -438,7 +452,7 @@ export default function Page() {
                                                                     const blob = await response.blob();
                                                                     const link = document.createElement("a");
                                                                     link.href = URL.createObjectURL(blob);
-                                                                    link.download = imageUrl.split("/").pop() || `image-${index}.jpg`; // Tên file download
+                                                                    link.download = imageUrl.split("?")[0].split("/").pop() || `image-${index}.jpg`; // Tên file download
                                                                     document.body.appendChild(link);
                                                                     link.click();
                                                                     URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
