@@ -38,9 +38,11 @@ Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc v
             checkValidImagesFail: "Lỗi khi tải hình ảnh:",
             analytics: {
                 total: "Tổng số URL",
-                success: "URL tìm thấy",
+                success: "URL hợp lệ",
                 fail: "URL lỗi",
+                duplicates: "URL trùng lặp",
             },
+            buttonHandleDuplicate: "Xử lý ngay",
             buttonClear: "Làm mới",
             buttonDownloadAll: "Tải tất cả",
             showEnd: "Tất cả kết quả đã được hiển thị!",

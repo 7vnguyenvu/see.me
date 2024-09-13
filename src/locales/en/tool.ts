@@ -39,9 +39,11 @@ Share features and services to support you in your work and study most effective
             checkValidImagesFail: "Error fetching images:",
             analytics: {
                 total: "Total URLs",
-                success: "URLs found",
+                success: "Valid URL",
                 fail: "Error URLs",
+                duplicates: "Duplicate URLs",
             },
+            buttonHandleDuplicate: "Clean up now",
             buttonClear: "Refresh",
             buttonDownloadAll: "Download all",
             showEnd: "All results shown!",
