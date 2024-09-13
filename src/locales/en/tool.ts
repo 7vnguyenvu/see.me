@@ -33,13 +33,13 @@ Share features and services to support you in your work and study most effective
             progressLabel: "Searching for images…",
             handleDownloadImages: {
                 missingImage: "There are no valid images to download.",
-                missingFolderName: "Please enter a folder name containing the images.",
+                missingFolderName: "Enter a folder name containing the images!",
                 errorDownloading: "Error download images",
             },
             checkValidImagesFail: "Error fetching images:",
             analytics: {
                 total: "Total URLs",
-                success: "Valid URL",
+                success: "Best URL",
                 fail: "Error URLs",
                 duplicates: "Duplicate URLs",
             },

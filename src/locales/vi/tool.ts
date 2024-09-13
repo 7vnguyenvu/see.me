@@ -32,13 +32,13 @@ Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc v
             progressLabel: "Đang tìm ảnh…",
             handleDownloadImages: {
                 missingImage: "Không có ảnh hợp lệ để tải.",
-                missingFolderName: "Vui lòng nhập tên thư mục.",
+                missingFolderName: "Hãy nhập tên file chứa ảnh để nén!",
                 errorDownloading: "Lỗi khi tải hình ảnh",
             },
             checkValidImagesFail: "Lỗi khi tải hình ảnh:",
             analytics: {
                 total: "Tổng số URL",
-                success: "URL hợp lệ",
+                success: "URL tốt nhất",
                 fail: "URL lỗi",
                 duplicates: "URL trùng lặp",
             },

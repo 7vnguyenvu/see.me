@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Divider, LinearProgress, Stack, Typography } from "@mui/joy";
+import { Box, Button, CircularProgress, Divider, LinearProgress, Stack, Typography } from "@mui/joy";
 import { Breadcrumb, FindImageLinksModal, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
 import { Delete, Download, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
@@ -64,6 +64,7 @@ export default function Page() {
 
     const [duplicates, setDuplicates] = useState<Record<string, number[]>>({}); // Store duplicate groups
     const [isHandleDuplicateLoading, setIsHandleDuplicateLoading] = useState<boolean>(false); // Loading state for the button
+    const [progressHandleImage, setProgressHandleImage] = useState<number>(0); // State to track progress
 
     useEffect(() => {
         const findDuplicates = async () => {
@@ -91,14 +92,58 @@ export default function Page() {
     }, [validImages]);
 
     const handleRemoveAllLowerQuality = async () => {
-        setIsHandleDuplicateLoading(true);
+        setIsHandleDuplicateLoading(true); // Hiển thị loading
+        setProgressHandleImage(0); // Đặt tiến độ bắt đầu từ 0%
+
+        // Hàm để so sánh ảnh pixel theo pixel
+        const areImagesIdentical = async (url1: string, url2: string): Promise<boolean> => {
+            const img1 = await loadImage(url1);
+            const img2 = await loadImage(url2);
+
+            if (img1.width !== img2.width || img1.height !== img2.height) return false;
+
+            const canvas1 = document.createElement("canvas");
+            const canvas2 = document.createElement("canvas");
+            const ctx1 = canvas1.getContext("2d");
+            const ctx2 = canvas2.getContext("2d");
+
+            canvas1.width = img1.width;
+            canvas1.height = img1.height;
+            canvas2.width = img2.width;
+            canvas2.height = img2.height;
+
+            ctx1?.drawImage(img1, 0, 0);
+            ctx2?.drawImage(img2, 0, 0);
+
+            const data1 = ctx1?.getImageData(0, 0, img1.width, img1.height).data;
+            const data2 = ctx2?.getImageData(0, 0, img2.width, img2.height).data;
+
+            // So sánh pixel theo pixel
+            if (data1 && data2) {
+                for (let i = 0; i < data1.length; i++) {
+                    if (data1[i] !== data2[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        };
 
         let updatedValidImages = [...validImages];
+        const processedGroups = new Set();
+
+        // Xử lý từng nhóm ảnh trùng lặp
+        const totalGroups = Object.keys(duplicates).length;
+        let processedGroupsCount = 0;
 
         for (const [fileName, indexes] of Object.entries(duplicates)) {
+            if (processedGroups.has(fileName)) continue;
+
+            // Lấy tất cả các URL ảnh trùng lặp
             const duplicateUrls = indexes.map((index) => validImages[index - 1]);
 
-            if (duplicateUrls && duplicateUrls.length > 1) {
+            if (duplicateUrls.length > 1) {
                 const resolutions = await Promise.all(duplicateUrls.map((url) => getImageResolution(url)));
 
                 // Tìm ảnh có độ phân giải cao nhất
@@ -106,13 +151,46 @@ export default function Page() {
                     return current.width * current.height > arr[maxIdx].width * arr[maxIdx].height ? idx : maxIdx;
                 }, 0);
 
-                // Loại bỏ tất cả ảnh trùng có chất lượng thấp hơn
-                updatedValidImages = updatedValidImages.filter((url) => !duplicateUrls.includes(url) || url === duplicateUrls[highestQualityIndex]);
+                const highestQualityUrl = duplicateUrls[highestQualityIndex];
+
+                // Đánh dấu các ảnh cần loại bỏ
+                const duplicatesToRemove = new Set<string>();
+
+                // Xử lý các ảnh có chất lượng giống nhau
+                for (let i = 0; i < duplicateUrls.length; i++) {
+                    for (let j = i + 1; j < duplicateUrls.length; j++) {
+                        if (await areImagesIdentical(duplicateUrls[i], duplicateUrls[j])) {
+                            duplicatesToRemove.add(duplicateUrls[j]);
+                        }
+                    }
+                }
+
+                // Loại bỏ tất cả các ảnh trùng lặp có chất lượng thấp hơn hoặc trùng tên
+                updatedValidImages = updatedValidImages.filter((url) => url === highestQualityUrl || !duplicatesToRemove.has(url));
+                processedGroups.add(fileName);
             }
+
+            processedGroupsCount++;
+            setProgressHandleImage(Math.round((processedGroupsCount / totalGroups) * 100));
         }
 
-        setValidImages(updatedValidImages);
+        // Loại bỏ ảnh có chất lượng giống nhau hoặc trùng tên
+        const uniqueValidImages = Array.from(new Set(updatedValidImages));
+
+        setValidImages(uniqueValidImages);
         setIsHandleDuplicateLoading(false);
+        setProgressHandleImage(100);
+    };
+
+    // Hàm để load ảnh từ URL
+    const loadImage = (url: string): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Đảm bảo có thể lấy dữ liệu pixel từ ảnh
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = url;
+        });
     };
 
     // Kiểm tra tính hợp lệ của URL ảnh
@@ -184,15 +262,15 @@ export default function Page() {
     const handleDownloadImages = () => {
         setIsDownAllLoading(true);
         if (validImages.length === 0) {
+            window.alert(T.page.handleDownloadImages.missingFolderName);
             setAlert(T.page.handleDownloadImages.missingImage);
-
             setIsDownAllLoading(false);
             return;
         }
 
         if (folderName.trim() === "") {
+            window.alert(T.page.handleDownloadImages.missingFolderName);
             setAlert(T.page.handleDownloadImages.missingFolderName);
-
             setIsDownAllLoading(false);
             return;
         }
@@ -256,7 +334,6 @@ export default function Page() {
 
                                 // Đảm bảo tên file không trùng lặp và thêm kích thước (width x height)
                                 const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
-                                console.log(uniqueFileName);
 
                                 // Add file vào folder với tên duy nhất
                                 folder?.file(`${uniqueFileName}.${extension === "webp" ? "jpg" : extension}`, blob);
@@ -282,12 +359,18 @@ export default function Page() {
     const handleClearContent = () => {
         setImageURLs("");
         setFolderName("");
-        setValidImages([]); // Xóa luôn danh sách preview
-        setExcludedImages(new Set()); // Xóa tất cả các ảnh bị loại bỏ
-        setBlobUrls({}); // Xóa tất cả các URL blob
+        setValidImages([]);
+        setExcludedImages(new Set());
+        setBlobUrls({});
         setAlert(null);
-        setProgress(0); // Reset progress
-        setErrorImages(0); // Reset error images
+        setProgress(0);
+        setErrorImages(0);
+
+        setLoadingValidImages(false);
+        setIsDownAllLoading(false);
+        setDuplicates({});
+        setIsHandleDuplicateLoading(false);
+        setProgressHandleImage(0);
     };
 
     return (
@@ -339,17 +422,6 @@ export default function Page() {
                                         resize: "vertical" as const,
                                     }}
                                 />
-                                {alert && (
-                                    <div
-                                        style={{
-                                            color: "red",
-                                            fontWeight: "bold" as const,
-                                            textAlign: "center" as const,
-                                        }}
-                                    >
-                                        {alert}
-                                    </div>
-                                )}
                                 {loadingValidImages && <LinearProgressWithLabel text={T.page.progressLabel} progress={progress} />}
                             </Grid>
 
@@ -378,10 +450,23 @@ export default function Page() {
                                             variant="solid"
                                             color="warning"
                                             size="sm"
-                                            loading={isHandleDuplicateLoading}
+                                            disabled={isHandleDuplicateLoading}
                                             onClick={handleRemoveAllLowerQuality}
+                                            endDecorator={
+                                                isHandleDuplicateLoading ? (
+                                                    <CircularProgress
+                                                        size="sm"
+                                                        variant="solid"
+                                                        color="warning"
+                                                        sx={{ scale: ".7 .7" }}
+                                                        thickness={4}
+                                                    />
+                                                ) : null
+                                            }
                                         >
-                                            {T.page.buttonHandleDuplicate}
+                                            <Typography level="title-sm">
+                                                {isHandleDuplicateLoading ? `${progressHandleImage}%` : T.page.buttonHandleDuplicate}
+                                            </Typography>
                                         </Button>
                                     )}
                                 </Stack>
@@ -433,6 +518,19 @@ export default function Page() {
                                         </Stack>
                                     </Grid>
                                 </Grid>
+                                {alert && (
+                                    <Box
+                                        sx={{
+                                            mt: 2,
+                                            color: "red",
+                                            fontSize: ".8rem",
+                                            fontWeight: "bold",
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        {alert}
+                                    </Box>
+                                )}
                             </Grid>
 
                             {/* Preview ảnh hợp lệ */}
@@ -440,13 +538,6 @@ export default function Page() {
                                 <Grid item xs={12}>
                                     <Grid container spacing={{ xs: 1, md: 1 }} sx={{ flexGrow: 1 }}>
                                         {validImages.map((imageUrl, index) => {
-                                            let imgUrl = imageUrl;
-
-                                            // Convert .webp to .jpg
-                                            if (imgUrl.endsWith(".webp")) {
-                                                imgUrl = imgUrl.replace(".webp", ".jpg");
-                                            }
-
                                             // Check if the image is excluded
                                             if (excludedImages.has(imageUrl)) {
                                                 return null; // Skip rendering the excluded image
@@ -480,7 +571,7 @@ export default function Page() {
                                                             alt={`preview-${index}`}
                                                             onError={() => {
                                                                 // Xử lý lỗi tải ảnh
-                                                                console.error(`Failed to load image at ${imgUrl}`);
+                                                                console.error(`Failed to load image at ${imageUrl}`);
                                                             }}
                                                             style={{
                                                                 width: "100%",
@@ -528,7 +619,10 @@ export default function Page() {
                                                                     const blob = await response.blob();
                                                                     const link = document.createElement("a");
                                                                     link.href = URL.createObjectURL(blob);
-                                                                    link.download = imageUrl.split("?")[0].split("/").pop() || `image-${index}.jpg`; // Tên file download
+                                                                    link.download = imageUrl.endsWith(".webp")
+                                                                        ? imageUrl.replace(".webp", ".jpg").split("?")[0].split("/").pop() ||
+                                                                          `image-${index}.jpg`
+                                                                        : imageUrl.split("?")[0].split("/").pop() || `image-${index}.jpg`; // Tên file download
                                                                     document.body.appendChild(link);
                                                                     link.click();
                                                                     URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
