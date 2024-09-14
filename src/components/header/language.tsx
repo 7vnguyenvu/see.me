@@ -68,6 +68,7 @@ export default function Languages() {
                         transform: "translateY(-50%) rotate(45deg)",
                         zIndex: 0,
                     },
+                    zIndex: 1300,
                 }}
             >
                 {langs.map((langItem) => (

@@ -6,8 +6,11 @@ import Languages from "./language";
 import LinkTo from "../link";
 import { ListMenuLeft } from "./menu";
 import NotiFy from "./notify";
+import Typewriter from "typewriter-effect";
 import { useGlobalContext } from "@/context/store";
 import { useState } from "react";
+
+export * from "./bottom-menu";
 
 type AnchorMenuPos = "left" | "right";
 
@@ -62,12 +65,11 @@ export function Header() {
                     width: { xs: 0, md: `${100 / 3}%` },
                     alignItems: "center",
                     justifyContent: "start",
-                    ":hover": { cursor: "pointer" },
                 }}
-                onClick={toggleDrawer("left", true)}
             >
                 <Box
                     sx={{
+                        ":hover": { cursor: "pointer" },
                         img: {
                             width: "auto",
                             height: "90%",
@@ -75,6 +77,7 @@ export function Header() {
                             borderRadius: `calc(infinity * 1px)`,
                         },
                     }}
+                    onClick={toggleDrawer("left", true)}
                 >
                     <Avatar
                         alt="user-avatar"
@@ -83,7 +86,23 @@ export function Header() {
                         sx={{ bgcolor: chooseThemeValueIn(color.white.lightSub, color.white.main, systemMode) }}
                     />
                 </Box>
-                <Typography sx={{ display: { sm: "none", md: "block" }, fontWeight: "bold" }}>7V NGUYEN VU</Typography>
+                <Box
+                    sx={{
+                        display: { sm: "none", md: "block" },
+                        color: chooseThemeValueIn(color.black.dark, color.white.main, systemMode),
+                        fontWeight: "bold",
+                        userSelect: "none",
+                    }}
+                >
+                    <Typewriter
+                        options={{
+                            strings: ["7V - NGUYEN VU", "SEE . ME"],
+                            autoStart: true,
+                            loop: true,
+                            cursor: " 🍀",
+                        }}
+                    />
+                </Box>
             </Stack>
 
             {/* LOGO NAME */}

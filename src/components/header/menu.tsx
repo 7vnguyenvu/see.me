@@ -1,5 +1,13 @@
 import { Avatar, Box, Divider, List, ListItem, ListItemButton, Stack, Typography } from "@mui/joy";
-import { CategoryRounded, HistoryEduRounded, HomeRounded, NearMe, SportsEsports, VisibilityRounded } from "@mui/icons-material";
+import {
+    CategoryRounded,
+    HistoryEduRounded,
+    HomeRepairServiceRounded,
+    HomeRounded,
+    NearMe,
+    SportsEsports,
+    VisibilityRounded,
+} from "@mui/icons-material";
 import { chooseThemeValueIn, color } from "..";
 
 import { Fragment } from "react";
@@ -12,37 +20,55 @@ const userMenu = [
     {
         _id: "lu1",
         url: "/",
-        name: "Thông tin chung",
+        name: {
+            en: "Home",
+            vi: "Trang chủ",
+        },
         iconMUI: "HomeRounded",
     },
     {
         _id: "lu2",
         url: "blogs",
-        name: "Bài viết & Nhật ký",
+        name: {
+            en: "Blogs & Diaries",
+            vi: "Bài viết & Nhật ký",
+        },
         iconMUI: "HistoryEduRounded",
     },
     {
         _id: "lu6",
         url: "tools",
-        name: "Công cụ & Dịch vụ",
-        iconMUI: "HistoryEduRounded",
+        name: {
+            en: "Tools & Services",
+            vi: "Công cụ & Dịch vụ",
+        },
+        iconMUI: "HomeRepairServiceRounded",
     },
     {
         _id: "lu3",
-        url: "entertaimemts",
-        name: "Trung tâm giải trí",
+        url: "entertaiments",
+        name: {
+            en: "Entertainment",
+            vi: "Giải trí",
+        },
         iconMUI: "SportsEsports",
     },
     {
         _id: "lu4",
         url: "projects",
-        name: "Dự án & Phác thảo",
+        name: {
+            en: "Projects & Sketches",
+            vi: "Dự án & Phác thảo",
+        },
         iconMUI: "CategoryRounded",
     },
     {
         _id: "lu5",
         url: "check",
-        name: "SEE.Check",
+        name: {
+            en: "SEE.Check",
+            vi: "SEE.Check",
+        },
         iconMUI: "VisibilityRounded",
     },
 ];
@@ -51,13 +77,19 @@ const systemMenu = [
     {
         _id: "ls1",
         url: "explore",
-        name: "Khám phá",
+        name: {
+            en: "Explore",
+            vi: "Khám phá",
+        },
         iconMUI: "",
     },
     {
         _id: "ls2",
         url: "check",
-        name: "SEE.Check",
+        name: {
+            en: "SEE.Check",
+            vi: "SEE.Check",
+        },
         iconMUI: "VisibilityRounded",
     },
 ];
@@ -66,6 +98,7 @@ const getIcon = (iconMUI: string) => {
     const Icon =
         {
             HomeRounded,
+            HomeRepairServiceRounded,
             HistoryEduRounded,
             SportsEsports,
             CategoryRounded,
@@ -76,7 +109,7 @@ const getIcon = (iconMUI: string) => {
 };
 
 export function ListMenuLeft() {
-    const { systemMode } = useGlobalContext();
+    const { lang, systemMode } = useGlobalContext();
 
     return (
         <Fragment>
@@ -129,7 +162,7 @@ export function ListMenuLeft() {
                         <LinkTo url={link.url} sx={{ textDecoration: "none", width: "100%" }}>
                             <ListItemButton sx={{ gap: 2 }}>
                                 {getIcon(link.iconMUI)}
-                                <Typography>{link.name}</Typography>
+                                <Typography>{link.name[lang]}</Typography>
                             </ListItemButton>
                         </LinkTo>
                     </ListItem>
@@ -140,6 +173,7 @@ export function ListMenuLeft() {
 }
 
 export function ListMenuRight() {
+    const { lang } = useGlobalContext();
     return (
         <Fragment>
             <List>
@@ -148,7 +182,7 @@ export function ListMenuRight() {
                         <LinkTo url={link.url} sx={{ textDecoration: "none", width: "100%" }}>
                             <ListItemButton>
                                 {getIcon(link.iconMUI)}
-                                <Typography>{link.name}</Typography>
+                                <Typography>{link.name[lang]}</Typography>
                             </ListItemButton>
                         </LinkTo>
                     </ListItem>

@@ -78,6 +78,7 @@ export default function NotiFy() {
                                 transform: "translateY(-50%) rotate(45deg)",
                                 zIndex: 0,
                             },
+                            zIndex: 1300,
                         }}
                     >
                         <Stack gap={1} sx={{ px: 2 }}>
