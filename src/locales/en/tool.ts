@@ -43,6 +43,7 @@ Share features and services to support you in your work and study most effective
                 fail: "Error URLs",
                 duplicates: "Duplicate URLs",
             },
+            buttonReload: "Reload",
             buttonHandleDuplicate: "Clean up now",
             buttonClear: "Refresh",
             buttonDownloadAll: "Download all",

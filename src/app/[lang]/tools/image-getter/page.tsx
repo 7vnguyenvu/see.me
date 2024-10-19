@@ -58,6 +58,7 @@ export default function Page() {
     const T = lang === "en" ? ToolEn.imageGetter : ToolVi.imageGetter;
 
     const [imageURLs, setImageURLs] = useState<string>("");
+    const [reloadImageURLs, setReloadImageURLs] = useState<boolean>(false);
     const [folderName, setFolderName] = useState<string>("");
     const [alert, setAlert] = useState<string | null>(null);
     const [loadingValidImages, setLoadingValidImages] = useState<boolean>(false);
@@ -205,57 +206,62 @@ export default function Page() {
     };
 
     // Kiểm tra tính hợp lệ của URL ảnh
-    useEffect(() => {
-        setLoadingValidImages(true);
+    const checkImageValidity = (url: string, timeout = 5000): Promise<{ isValid: boolean; errorType?: string }> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            const timer = setTimeout(() => {
+                img.src = "";
+                resolve({ isValid: false, errorType: "Timeout" });
+            }, timeout);
+
+            img.onload = () => {
+                clearTimeout(timer);
+                resolve({ isValid: true });
+            };
+            img.onerror = (e) => {
+                clearTimeout(timer);
+                const error = e as ErrorEvent;
+                resolve({ isValid: false, errorType: error.message || "Unknown error" });
+            };
+            img.src = url;
+        });
+    };
+
+    const checkValidImages = async () => {
         const urls = imageURLs
             .split("\n")
             .map((url) => url.trim())
             .filter((url) => url !== "");
 
-        const checkImageValidity = (url: string, timeout = 5000): Promise<{ isValid: boolean; errorType?: string }> => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                const timer = setTimeout(() => {
-                    img.src = "";
-                    resolve({ isValid: false, errorType: "Timeout" });
-                }, timeout);
+        const validImageList: string[] = [];
+        const errImageList: URLErrorImage[] = [];
 
-                img.onload = () => {
-                    clearTimeout(timer);
-                    resolve({ isValid: true });
-                };
-                img.onerror = (e) => {
-                    clearTimeout(timer);
-                    const error = e as ErrorEvent;
-                    resolve({ isValid: false, errorType: error.message || "Unknown error" });
-                };
-                img.src = url;
-            });
-        };
+        for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            const { isValid, errorType } = await checkImageValidity(url);
 
-        const checkValidImages = async () => {
-            const validImageList: string[] = [];
-            const errImageList: URLErrorImage[] = [];
-
-            for (let i = 0; i < urls.length; i++) {
-                const url = urls[i];
-                const { isValid, errorType } = await checkImageValidity(url);
-
-                if (isValid) {
-                    validImageList.push(url);
-                } else {
-                    errImageList.push({ url, index: i + 1, errorType: errorType || "Lỗi tải ảnh" });
-                }
-
-                setProgress(((i + 1) / urls.length) * 100);
+            if (isValid) {
+                validImageList.push(url);
+            } else {
+                errImageList.push({ url, index: i + 1, errorType: errorType || "Lỗi tải ảnh" });
             }
 
-            setValidImages(validImageList);
-            setErrorImages(errImageList);
-            setLoadingValidImages(false);
-        };
+            setProgress(((i + 1) / urls.length) * 100);
+        }
 
+        setValidImages(validImageList);
+        setErrorImages(errImageList);
+        setLoadingValidImages(false);
+        setReloadImageURLs(false);
+    };
+
+    const loadURLs = () => {
+        setLoadingValidImages(true);
         checkValidImages();
+    };
+
+    useEffect(() => {
+        loadURLs();
     }, [imageURLs]);
 
     const getProxyImageUrl = (url: string) => {
@@ -475,7 +481,21 @@ export default function Page() {
                         <Grid container spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, pt: 4, pb: 1 }}>
                             {/* Nút tìm link ảnh */}
                             <Grid item xs={12} md={12}>
-                                <FindImageLinksModal setImageURLs={setImageURLs} />
+                                <Stack direction={"row"} justifyContent={"space-between"}>
+                                    <FindImageLinksModal setImageURLs={setImageURLs} />
+                                    <Button
+                                        onClick={() => {
+                                            setReloadImageURLs(true);
+                                            loadURLs();
+                                        }}
+                                        color="primary"
+                                        disabled={reloadImageURLs}
+                                        loading={reloadImageURLs}
+                                        startDecorator={<Refresh />}
+                                    >
+                                        {T.page.buttonReload}
+                                    </Button>
+                                </Stack>
                             </Grid>
 
                             <Grid item xs={12} md={12}>
@@ -526,7 +546,7 @@ export default function Page() {
                                         {errorImages.length > 0 && (
                                             <Tooltip
                                                 title={
-                                                    <Stack sx={{ p: 1 }} spacing={1}>
+                                                    <Stack sx={{ p: 1, maxWidth: 800, wordBreak: "break-word" }} spacing={1}>
                                                         {Object.keys(groupedErrors).map((errorType) => (
                                                             <div key={errorType}>
                                                                 <Typography level="title-md" textColor={color.warning.main}>
@@ -640,7 +660,7 @@ export default function Page() {
                                         </Grid>
                                         <Grid item xs={12} md={4}>
                                             <Stack direction={"row"} gap={2} sx={{ flexGrow: 1, justifyContent: { xs: "center", md: "right" } }}>
-                                                <Button onClick={handleClearContent} color="danger" startDecorator={<Refresh />}>
+                                                <Button onClick={handleClearContent} color="danger" startDecorator={<Delete />}>
                                                     {T.page.buttonClear}
                                                 </Button>
                                                 <Button

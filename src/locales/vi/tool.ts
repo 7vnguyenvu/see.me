@@ -42,6 +42,7 @@ Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc v
                 fail: "URL lỗi",
                 duplicates: "URL trùng lặp",
             },
+            buttonReload: "Tìm nạp lại",
             buttonHandleDuplicate: "Xử lý ngay",
             buttonClear: "Làm mới",
             buttonDownloadAll: "Tải tất cả",
