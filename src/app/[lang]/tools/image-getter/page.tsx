@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, Button, CircularProgress, Divider, LinearProgress, Stack, Typography } from "@mui/joy";
+import { Box, Button, CircularProgress, Divider, LinearProgress, Stack, Tooltip, Typography } from "@mui/joy";
 import { Breadcrumb, FindImageLinksModal, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
-import { Delete, Download, Refresh } from "@mui/icons-material";
+import { Delete, Download, ErrorOutline, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
 import { useEffect, useState } from "react";
 
@@ -10,6 +10,12 @@ import { Fragment } from "react";
 import { Grid } from "@mui/material";
 import JSZip from "jszip";
 import { useGlobalContext } from "@/context/store";
+
+interface URLErrorImage {
+    url: string;
+    index: number;
+    errorType: string;
+}
 
 const BreadcrumbParentTag = [
     {
@@ -58,13 +64,18 @@ export default function Page() {
     const [validImages, setValidImages] = useState<string[]>([]);
     const [excludedImages, setExcludedImages] = useState<Set<string>>(new Set());
     const [progress, setProgress] = useState<number>(0); // State to track progress
-    const [errorImages, setErrorImages] = useState<number>(0); // State to track error images
+    const [errorImages, setErrorImages] = useState<URLErrorImage[]>([]); // Danh sách URL lỗi
+    const [showTooltipShowError, setShowTooltipShowError] = useState<boolean>(false);
     const [blobUrls, setBlobUrls] = useState<Record<string, string | null>>({});
     const [isDownAllLoading, setIsDownAllLoading] = useState<boolean>(false); // Loading state for the button
 
     const [duplicates, setDuplicates] = useState<Record<string, number[]>>({}); // Store duplicate groups
     const [isHandleDuplicateLoading, setIsHandleDuplicateLoading] = useState<boolean>(false); // Loading state for the button
     const [progressHandleImage, setProgressHandleImage] = useState<number>(0); // State to track progress
+
+    const handleToggleTooltipShowError = () => {
+        setShowTooltipShowError(!showTooltipShowError);
+    };
 
     useEffect(() => {
         const findDuplicates = async () => {
@@ -201,34 +212,56 @@ export default function Page() {
             .map((url) => url.trim())
             .filter((url) => url !== "");
 
+        const checkImageValidity = (url: string, timeout = 5000): Promise<{ isValid: boolean; errorType?: string }> => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const timer = setTimeout(() => {
+                    img.src = "";
+                    resolve({ isValid: false, errorType: "Timeout" });
+                }, timeout);
+
+                img.onload = () => {
+                    clearTimeout(timer);
+                    resolve({ isValid: true });
+                };
+                img.onerror = (e) => {
+                    clearTimeout(timer);
+                    const error = e as ErrorEvent;
+                    resolve({ isValid: false, errorType: error.message || "Unknown error" });
+                };
+                img.src = url;
+            });
+        };
+
         const checkValidImages = async () => {
             const validImageList: string[] = [];
-            let errorCount = 0; // Biến đếm số lượng ảnh bị lỗi
+            const errImageList: URLErrorImage[] = [];
 
             for (let i = 0; i < urls.length; i++) {
-                try {
-                    const response = await fetch(urls[i]);
-                    if (response.ok && response.headers.get("content-type")?.includes("image")) {
-                        validImageList.push(urls[i]);
-                    } else {
-                        errorCount++; // Tăng biến đếm khi ảnh bị lỗi
-                    }
-                } catch (error) {
-                    console.error(T.page.checkValidImagesFail, error);
-                    errorCount++; // Tăng biến đếm khi xảy ra lỗi fetch
+                const url = urls[i];
+                const { isValid, errorType } = await checkImageValidity(url);
+
+                if (isValid) {
+                    validImageList.push(url);
+                } else {
+                    errImageList.push({ url, index: i + 1, errorType: errorType || "Lỗi tải ảnh" });
                 }
 
-                // Cập nhật thanh tiến trình
                 setProgress(((i + 1) / urls.length) * 100);
             }
 
-            setValidImages(validImageList); // Cập nhật danh sách URL ảnh hợp lệ
-            setErrorImages(errorCount); // Cập nhật số lượng ảnh bị lỗi
-            setLoadingValidImages(false); // Tắt trạng thái loading khi hoàn thành
+            setValidImages(validImageList);
+            setErrorImages(errImageList);
+            setLoadingValidImages(false);
         };
 
         checkValidImages();
     }, [imageURLs]);
+
+    const getProxyImageUrl = (url: string) => {
+        // Sử dụng một dịch vụ proxy ảnh, ví dụ: images.weserv.nl
+        return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+    };
 
     useEffect(() => {
         const fetchBlobs = async () => {
@@ -259,113 +292,154 @@ export default function Page() {
         };
     }, [validImages]);
 
-    const handleDownloadImages = () => {
+    const handleDownloadImages = async () => {
         setIsDownAllLoading(true);
         if (validImages.length === 0) {
-            window.alert(T.page.handleDownloadImages.missingFolderName);
             setAlert(T.page.handleDownloadImages.missingImage);
             setIsDownAllLoading(false);
             return;
         }
 
         if (folderName.trim() === "") {
-            window.alert(T.page.handleDownloadImages.missingFolderName);
             setAlert(T.page.handleDownloadImages.missingFolderName);
             setIsDownAllLoading(false);
             return;
         }
 
         setAlert(null);
-
         const zip = new JSZip();
         const folder = zip.folder(folderName);
-
-        // Kiểu dữ liệu cho usedFileNames để theo dõi các tên file đã sử dụng
         const usedFileNames: Record<string, boolean> = {};
 
-        // Hàm để cắt ngắn tên file nếu dài hơn 25 ký tự
-        const truncateFileName = (fileName: string): string => {
-            const maxLength = 20;
-            return fileName.length > maxLength ? fileName.substring(0, maxLength) : fileName;
-        };
-
-        // Hàm để lấy tên file duy nhất
         const getUniqueFileName = (baseFileName: string, dimensions: [number, number]): string => {
             const [width, height] = dimensions;
             const truncatedFileName = truncateFileName(baseFileName);
             let uniqueName = `${truncatedFileName}_${width}x${height}`;
             let counter = 1;
 
-            // Kiểm tra xem tên file với kích thước đã tồn tại chưa
             while (usedFileNames[uniqueName]) {
                 uniqueName = `${truncatedFileName}_${width}x${height} (${counter})`;
                 counter++;
             }
 
-            // Đánh dấu tên file là đã sử dụng
             usedFileNames[uniqueName] = true;
             return uniqueName;
         };
 
-        const promises = validImages
-            .filter((url) => !excludedImages.has(url)) // Lọc ảnh bị loại bỏ
-            .map((url) => {
-                return fetch(url)
-                    .then((response) => response.blob())
-                    .then((blob) => {
-                        const urlParts = url.split("/");
-                        let fileName = urlParts[urlParts.length - 1];
+        const downloadPromises = validImages
+            .filter((url) => !excludedImages.has(url))
+            .map(async (url) => {
+                try {
+                    const proxyUrl = getProxyImageUrl(url); // Sử dụng một CORS proxy
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const blob = await response.blob();
+                    const urlParts = url.split("/");
+                    let fileName = urlParts[urlParts.length - 1].split("?")[0];
+                    const extension = fileName.split(".").pop();
+                    const baseFileName = fileName.split(".").slice(0, -1).join(".");
 
-                        // Loại bỏ phần query string (nếu có) từ tên file
-                        fileName = fileName.split("?")[0];
+                    let finalBlob = blob;
+                    if (extension === "webp") {
+                        finalBlob = await convertWebpToJpg(blob);
+                    }
 
-                        // Convert .webp to .jpg, giữ phần mở rộng gốc cho các định dạng khác
-                        const extension = fileName.split(".").pop();
-                        const baseFileName = fileName.split(".").slice(0, -1).join("."); // Loại bỏ phần mở rộng
+                    const img = new Image();
+                    img.src = URL.createObjectURL(finalBlob);
+                    await new Promise((resolve) => (img.onload = resolve));
 
-                        // Tạo đối tượng URL từ blob để lấy kích thước ảnh
-                        return new Promise<void>((resolve) => {
-                            const img = new Image();
-                            img.src = URL.createObjectURL(blob);
-                            img.onload = () => {
-                                const width = img.width;
-                                const height = img.height;
-                                const dimensions: [number, number] = [width, height];
+                    const dimensions: [number, number] = [img.width, img.height];
+                    const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
 
-                                // Đảm bảo tên file không trùng lặp và thêm kích thước (width x height)
-                                const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
-
-                                // Add file vào folder với tên duy nhất
-                                folder?.file(`${uniqueFileName}.${extension === "webp" ? "jpg" : extension}`, blob);
-                                resolve();
-                            };
-                        });
-                    })
-                    .catch((error) => console.error(T.page.handleDownloadImages.errorDownloading, error));
+                    folder?.file(`${uniqueFileName}.${extension === "webp" ? "jpg" : extension}`, finalBlob);
+                    URL.revokeObjectURL(img.src);
+                } catch (error) {
+                    console.error(`Error downloading image from ${url}:`, error);
+                    // Có thể thêm logic để thông báo cho người dùng về ảnh không tải được
+                }
             });
 
-        Promise.all(promises).then(() => {
-            zip.generateAsync({ type: "blob" }).then((content) => {
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(content);
-                link.download = `${folderName}.zip`;
-                link.click();
-            });
-        });
-
-        setIsDownAllLoading(false);
+        try {
+            await Promise.all(downloadPromises);
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(content);
+            link.download = `${folderName}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error creating zip file:", error);
+            window.alert("Failed to create zip file. Please try again.");
+        } finally {
+            setIsDownAllLoading(false);
+        }
     };
+
+    const downloadSingleImage = async (imageUrl: string) => {
+        // Sử dụng proxy nếu có vấn đề CORS
+        const proxyUrl = getProxyImageUrl(imageUrl);
+
+        try {
+            const imageResponse = await fetch(proxyUrl);
+            if (!imageResponse.ok) {
+                throw new Error("Failed to fetch image");
+            }
+
+            const imageBlob = await imageResponse.blob();
+
+            // Kiểm tra nếu ảnh là WebP
+            if (imageBlob.type === "image/webp") {
+                const img = new Image();
+                img.src = URL.createObjectURL(imageBlob);
+
+                img.onload = function () {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0);
+                        canvas.toBlob(function (blob) {
+                            if (blob) {
+                                const link = document.createElement("a");
+                                link.href = URL.createObjectURL(blob);
+                                link.download = `${imageUrl.replace(".webp", ".jpg").split("?")[0].split("/").pop()}`;
+                                link.click();
+                            }
+                        }, "image/jpeg");
+                    }
+                };
+            } else {
+                // Tải ảnh như nó vốn có nếu không phải là WebP
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(imageBlob);
+                link.download = `${imageUrl.split("?")[0].split("/").pop()}`;
+                link.click();
+            }
+        } catch (error) {
+            console.error("Error downloading image:", error);
+        }
+    };
+
+    // Phân nhóm các URL lỗi theo loại lỗi
+    const groupedErrors = errorImages.reduce((groups, error) => {
+        if (!groups[error.errorType]) {
+            groups[error.errorType] = [];
+        }
+        groups[error.errorType].push(error);
+        return groups;
+    }, {} as { [key: string]: { url: string; index: number }[] });
 
     const handleClearContent = () => {
         setImageURLs("");
         setFolderName("");
         setValidImages([]);
+        setErrorImages([]);
         setExcludedImages(new Set());
         setBlobUrls({});
         setAlert(null);
         setProgress(0);
-        setErrorImages(0);
-
         setLoadingValidImages(false);
         setIsDownAllLoading(false);
         setDuplicates({});
@@ -435,8 +509,59 @@ export default function Page() {
                                         {T.page.analytics.success}: {validImages.length}
                                     </Typography>
                                     <Typography level="body-sm" textColor="neutral.600">
-                                        {T.page.analytics.fail}: {errorImages}
+                                        {T.page.analytics.fail}: {errorImages.length}
                                     </Typography>
+                                    {errorImages.length > 0 && (
+                                        <Tooltip
+                                            title={
+                                                <Stack sx={{ p: 1 }} spacing={1}>
+                                                    {Object.keys(groupedErrors).map((errorType) => (
+                                                        <div key={errorType}>
+                                                            <Typography level="title-md" textColor={color.warning.main}>
+                                                                {`${errorType}`}
+                                                            </Typography>
+                                                            <ul
+                                                                style={{
+                                                                    paddingLeft: "20px",
+                                                                    listStyleType: "none",
+                                                                    color: color.pink.light,
+                                                                    margin: 0,
+                                                                }}
+                                                            >
+                                                                {groupedErrors[errorType].map(({ url, index }) => (
+                                                                    <li key={index}>
+                                                                        <Stack direction="row" gap={1}>
+                                                                            <Typography level="title-sm">{`URL [${index}]`}:</Typography>
+                                                                            <Typography level="title-sm">
+                                                                                <a
+                                                                                    href={`${url}`}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    style={{ color: color.pink.light }}
+                                                                                >
+                                                                                    {url}
+                                                                                </a>
+                                                                            </Typography>
+                                                                        </Stack>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    ))}
+                                                </Stack>
+                                            }
+                                            placement="right-end"
+                                            open={showTooltipShowError} // Hiển thị khi icon được click
+                                            onClose={() => setShowTooltipShowError(false)}
+                                            disableHoverListener // Không hiển thị khi hover
+                                            arrow // Mũi tên trên tooltip
+                                        >
+                                            <ErrorOutline
+                                                onClick={handleToggleTooltipShowError}
+                                                sx={{ scale: ".7 .7", cursor: "pointer", color: color.pink.main }}
+                                            />
+                                        </Tooltip>
+                                    )}
                                 </Stack>
                                 <Stack direction={"row"} gap={2} sx={{ alignItems: "center", mt: 1 }}>
                                     <Typography level="body-sm" textColor="neutral.600">
@@ -543,8 +668,7 @@ export default function Page() {
                                                 return null; // Skip rendering the excluded image
                                             }
 
-                                            // Create a unique URL for each image blob
-                                            const blobUrl = blobUrls[imageUrl] || "";
+                                            const proxyUrl = getProxyImageUrl(imageUrl);
 
                                             return (
                                                 <Grid item xs={6} sm={3} md={2} key={index}>
@@ -567,11 +691,11 @@ export default function Page() {
                                                         </Typography>
 
                                                         <img
-                                                            src={blobUrl || ""}
+                                                            src={proxyUrl}
                                                             alt={`preview-${index}`}
-                                                            onError={() => {
-                                                                // Xử lý lỗi tải ảnh
+                                                            onError={(e) => {
                                                                 console.error(`Failed to load image at ${imageUrl}`);
+                                                                (e.target as HTMLImageElement).src = "/path/to/fallback/image.jpg"; // Thêm một ảnh fallback
                                                             }}
                                                             style={{
                                                                 width: "100%",
@@ -613,24 +737,7 @@ export default function Page() {
                                                                 margin: "5px",
                                                                 fontSize: "0.7rem",
                                                             }}
-                                                            onClick={async () => {
-                                                                try {
-                                                                    const response = await fetch(imageUrl);
-                                                                    const blob = await response.blob();
-                                                                    const link = document.createElement("a");
-                                                                    link.href = URL.createObjectURL(blob);
-                                                                    link.download = imageUrl.endsWith(".webp")
-                                                                        ? imageUrl.replace(".webp", ".jpg").split("?")[0].split("/").pop() ||
-                                                                          `image-${index}.jpg`
-                                                                        : imageUrl.split("?")[0].split("/").pop() || `image-${index}.jpg`; // Tên file download
-                                                                    document.body.appendChild(link);
-                                                                    link.click();
-                                                                    URL.revokeObjectURL(link.href); // Dọn dẹp URL blob
-                                                                    document.body.removeChild(link);
-                                                                } catch (error) {
-                                                                    console.error("Error downloading image:", error);
-                                                                }
-                                                            }}
+                                                            onClick={() => downloadSingleImage(imageUrl)}
                                                         >
                                                             <Download />
                                                         </Button>
@@ -657,5 +764,33 @@ const getImageResolution = async (imageUrl: string) => {
         img.onload = () => resolve({ width: img.width, height: img.height });
         img.onerror = reject;
         img.src = imageUrl;
+    });
+};
+
+// Hàm rút ngắn tên file
+const truncateFileName = (fileName: string): string => {
+    const maxLength = 20;
+    return fileName.length > maxLength ? fileName.substring(0, maxLength) : fileName;
+};
+
+// Hàm chuyển đổi webp sang jpg
+const convertWebpToJpg = (blob: Blob): Promise<Blob> => {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(blob);
+
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob((newBlob) => {
+                    if (newBlob) resolve(newBlob);
+                }, "image/jpeg");
+            }
+            URL.revokeObjectURL(img.src); // Giải phóng bộ nhớ
+        };
     });
 };
