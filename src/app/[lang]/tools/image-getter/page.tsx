@@ -256,6 +256,7 @@ export default function Page() {
     };
 
     const loadURLs = () => {
+        handleClearWithoutURLs();
         setLoadingValidImages(true);
         checkValidImages();
     };
@@ -456,6 +457,10 @@ export default function Page() {
 
     const handleClearContent = () => {
         setImageURLs("");
+        handleClearWithoutURLs();
+    };
+
+    const handleClearWithoutURLs = () => {
         setFolderName("");
         setValidImages([]);
         setErrorImages([]);
