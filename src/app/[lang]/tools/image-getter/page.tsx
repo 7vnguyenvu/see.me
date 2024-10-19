@@ -340,28 +340,40 @@ export default function Page() {
             .filter((url) => !excludedImages.has(url))
             .map(async (url) => {
                 try {
-                    const proxyUrl = getProxyImageUrl(url); // Sử dụng một CORS proxy
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const blob = await response.blob();
-                    const urlParts = url.split("/");
-                    let fileName = urlParts[urlParts.length - 1].split("?")[0];
-                    const extension = fileName.split(".").pop();
-                    const baseFileName = fileName.split(".").slice(0, -1).join(".");
+                    let finalBlob;
+                    let fileName = "";
+                    let extension = "";
 
-                    let finalBlob = blob;
-                    // if (extension === "webp") {
-                    //     finalBlob = await convertWebpToJpg(blob);
-                    // }
+                    if (url.startsWith("data:image/")) {
+                        // Nếu là base64, tạo Blob từ base64
+                        const byteString = atob(url.split(",")[1]);
+                        const mimeString = url.split(",")[0].split(":")[1].split(";")[0];
+                        const ab = new Uint8Array(byteString.length);
+                        for (let i = 0; i < byteString.length; i++) {
+                            ab[i] = byteString.charCodeAt(i);
+                        }
+                        finalBlob = new Blob([ab], { type: mimeString });
+                        fileName = `image_base64_${Date.now()}`; // Đặt tên cho ảnh base64
+                        extension = mimeString.split("/")[1]; // Lấy phần mở rộng từ mime type
+                    } else {
+                        // Nếu là URL, sử dụng proxy để tải ảnh
+                        const proxyUrl = getProxyImageUrl(url);
+                        const response = await fetch(proxyUrl);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        finalBlob = await response.blob();
+                        const urlParts = url.split("/");
+                        fileName = urlParts[urlParts.length - 1].split("?")[0];
+                        extension = `${fileName.split(".").pop()}`;
+                    }
 
                     const img = new Image();
                     img.src = URL.createObjectURL(finalBlob);
                     await new Promise((resolve) => (img.onload = resolve));
 
                     const dimensions: [number, number] = [img.width, img.height];
+                    const baseFileName = fileName.split(".").slice(0, -1).join(".");
                     const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
 
-                    // folder?.file(`${uniqueFileName}.${extension === "webp" ? "jpg" : extension}`, finalBlob);
                     folder?.file(`${uniqueFileName}.${extension}`, finalBlob);
                     URL.revokeObjectURL(img.src);
                 } catch (error) {
