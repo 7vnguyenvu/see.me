@@ -6,8 +6,6 @@ import { color } from "@/components";
 import { useGlobalContext } from "@/context/store";
 import { useState } from "react";
 
-const parserDOM = new DOMParser();
-
 export function FindImageLinksModal({ setImageURLs }: { setImageURLs: (urls: string) => void }) {
     const { lang } = useGlobalContext();
     const T = lang === "en" ? ToolEn.imageGetter.modal.FindImageLinksModal : ToolVi.imageGetter.modal.FindImageLinksModal;
@@ -127,6 +125,8 @@ function findImageLinksFromTags(text: string): string[] {
         return [];
     }
 
+    const parserDOM = new DOMParser();
+
     const doc = parserDOM.parseFromString(`<div>${text}</div>`, "text/html");
 
     const anchorImages = Array.from(doc.querySelectorAll("a"))
@@ -161,6 +161,7 @@ function findImageLinksWithRegex(text: string): string[] {
 }
 
 function combineWithDomain(links: string[], text: string): string[] {
+    const parserDOM = new DOMParser();
     const doc = parserDOM.parseFromString(text, "text/html");
 
     const domainElement = doc.querySelector('a[href^="http"]');
