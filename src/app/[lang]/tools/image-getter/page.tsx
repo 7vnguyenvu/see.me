@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, CircularProgress, Divider, LinearProgress, Stack, Tooltip, Typography } from "@mui/joy";
-import { Breadcrumb, FindImageLinksModal, Header, MARGIN_HEADER, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
+import { Breadcrumb, FindImageLinksModal, Header, MARGIN_HEADER, Main, Main_Container, chooseThemeValueIn, color, isBase64Image } from "@/components";
 import { Delete, Download, ErrorOutline, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
 import { useEffect, useState } from "react";
@@ -265,6 +265,10 @@ export default function Page() {
     }, [imageURLs]);
 
     const getProxyImageUrl = (url: string) => {
+        if (isBase64Image(url)) {
+            return url; // Trả về trực tiếp nếu là base64
+        }
+
         // Sử dụng một dịch vụ proxy ảnh, ví dụ: images.weserv.nl
         return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
     };
