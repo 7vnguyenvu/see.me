@@ -66,6 +66,11 @@ export const color = {
         light: "#ffffff",
         dark: "#ffffff",
     },
+    tooltip: {
+        light: "#cccccc",
+        dark: "#272727",
+        // dark: "#636c75",
+    },
 };
 
 export const chooseThemeValueIn = (valueForLightTheme: string, valueForDarkTheme: string, systemMode: "light" | "dark"): string => {

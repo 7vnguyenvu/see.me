@@ -2,9 +2,9 @@
 
 import { Box, Button, CircularProgress, Divider, LinearProgress, Stack, Tooltip, Typography } from "@mui/joy";
 import { Breadcrumb, FindImageLinksModal, Header, MARGIN_HEADER, Main, Main_Container, chooseThemeValueIn, color, isBase64Image } from "@/components";
-import { Delete, Download, ErrorOutline, Refresh } from "@mui/icons-material";
+import { Close, ContentCopy, Delete, Download, ErrorOutline, OpenInNew, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Fragment } from "react";
 import { Grid } from "@mui/material";
@@ -57,6 +57,8 @@ export default function Page() {
     const { lang, systemMode } = useGlobalContext();
     const T = lang === "en" ? ToolEn.imageGetter : ToolVi.imageGetter;
 
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
     const [imageURLs, setImageURLs] = useState<string>("");
     const [reloadImageURLs, setReloadImageURLs] = useState<boolean>(false);
     const [folderName, setFolderName] = useState<string>("");
@@ -76,6 +78,41 @@ export default function Page() {
 
     const handleToggleTooltipShowError = () => {
         setShowTooltipShowError(!showTooltipShowError);
+    };
+
+    // Khi người dùng nhấn vào một URL lỗi
+    const handleHighlightErrorUrl = (url: string, urlIndex: number) => {
+        const textarea = textareaRef.current;
+        const row = urlIndex - 1;
+
+        if (textarea) {
+            const lines = textarea.value.split("\n");
+            var atIndex = 0;
+
+            if (row) {
+                for (var i = 0; i < row; i++) {
+                    atIndex += lines[i].length;
+                }
+            }
+
+            const startIndex = atIndex + row;
+            const endIndex = startIndex + lines[row].length;
+            textarea.focus();
+            textarea.setSelectionRange(startIndex, endIndex); // Highlight URL
+
+            // Tự động scroll đến vị trí URL được highlight
+            const lineHeight = 20; // Giả định chiều cao mỗi dòng là 20px (bạn có thể điều chỉnh nếu cần)
+            const scrollPosition = urlIndex * lineHeight - textarea.clientHeight / 2; // Căn giữa URL được highlight
+
+            textarea.scrollTop = scrollPosition;
+        }
+    };
+
+    // Sao chép URL vào clipboard
+    const handleCopyToClipboard = (url: string) => {
+        navigator.clipboard.writeText(url).catch((err) => {
+            console.error("Failed to copy: ", err);
+        });
     };
 
     useEffect(() => {
@@ -521,6 +558,7 @@ export default function Page() {
 
                             <Grid item xs={12} md={12}>
                                 <textarea
+                                    ref={textareaRef}
                                     value={imageURLs}
                                     onChange={(e) => {
                                         setImageURLs(e.target.value);
@@ -566,8 +604,34 @@ export default function Page() {
                                         </Typography>
                                         {errorImages.length > 0 && (
                                             <Tooltip
+                                                sx={{
+                                                    bgcolor: color.tooltip.dark,
+                                                }}
                                                 title={
-                                                    <Stack sx={{ p: 1, maxWidth: 800, wordBreak: "break-word" }} spacing={1}>
+                                                    <Stack
+                                                        sx={{
+                                                            bgcolor: color.tooltip.dark,
+                                                            position: "relative",
+                                                            p: 1,
+                                                            minWidth: 400,
+                                                            maxWidth: 800,
+                                                            maxHeight: 360,
+                                                            overflow: "overlay",
+                                                            "&::-webkit-scrollbar": {
+                                                                borderRadius: 4,
+                                                                width: 6,
+                                                            },
+                                                            "&::-webkit-scrollbar-thumb": {
+                                                                borderRadius: 4,
+                                                                backgroundColor: color.white.main,
+                                                            },
+                                                            "&::-webkit-scrollbar-track": {
+                                                                borderRadius: 4,
+                                                                backgroundColor: color.white.sub,
+                                                            },
+                                                        }}
+                                                        spacing={1}
+                                                    >
                                                         {Object.keys(groupedErrors).map((errorType) => (
                                                             <div key={errorType}>
                                                                 <Typography level="title-md" textColor={color.warning.main}>
@@ -583,31 +647,104 @@ export default function Page() {
                                                                 >
                                                                     {groupedErrors[errorType].map(({ url, index }) => (
                                                                         <li key={index}>
-                                                                            <Stack direction="row" gap={1}>
-                                                                                <Typography level="title-sm">{`URL [${index}]`}:</Typography>
-                                                                                <Typography level="title-sm">
+                                                                            <Stack
+                                                                                direction="row"
+                                                                                gap={1}
+                                                                                sx={{
+                                                                                    borderBottom:
+                                                                                        index <= groupedErrors[errorType].length - 1
+                                                                                            ? `thin solid #000`
+                                                                                            : `none`,
+                                                                                    py: 1,
+                                                                                }}
+                                                                            >
+                                                                                <Typography
+                                                                                    sx={{
+                                                                                        minWidth: "10%",
+                                                                                    }}
+                                                                                    level="title-sm"
+                                                                                >
+                                                                                    {`URL [${index}]`}:
+                                                                                </Typography>
+
+                                                                                <Typography
+                                                                                    onClick={() => handleHighlightErrorUrl(url, index)}
+                                                                                    sx={{
+                                                                                        flexGrow: 1,
+                                                                                        wordBreak: "break-all",
+                                                                                        color: color.pink.light,
+                                                                                        ":hover": {
+                                                                                            color: color.secondary.main,
+                                                                                            cursor: "pointer",
+                                                                                        },
+                                                                                    }}
+                                                                                    level="title-sm"
+                                                                                >
+                                                                                    {url}
+                                                                                </Typography>
+
+                                                                                <Stack direction={"row"} gap={1}>
+                                                                                    <ContentCopy
+                                                                                        onClick={() => handleCopyToClipboard(url)}
+                                                                                        sx={{
+                                                                                            ":hover": {
+                                                                                                color: color.secondary.main,
+                                                                                                cursor: "pointer",
+                                                                                            },
+                                                                                        }}
+                                                                                    />
                                                                                     <a
                                                                                         href={`${url}`}
                                                                                         target="_blank"
-                                                                                        rel="noopener noreferrer"
-                                                                                        style={{ color: color.pink.light }}
+                                                                                        rel="noopener noreferrer nofollow"
+                                                                                        style={{ textDecoration: "none" }}
                                                                                     >
-                                                                                        {url}
+                                                                                        <OpenInNew
+                                                                                            sx={{
+                                                                                                ":hover": {
+                                                                                                    color: color.secondary.main,
+                                                                                                    cursor: "pointer",
+                                                                                                },
+                                                                                            }}
+                                                                                        />
                                                                                     </a>
-                                                                                </Typography>
+                                                                                </Stack>
                                                                             </Stack>
                                                                         </li>
                                                                     ))}
                                                                 </ul>
                                                             </div>
                                                         ))}
+                                                        <Box
+                                                            onClick={() => setShowTooltipShowError(false)}
+                                                            sx={{
+                                                                px: 1,
+                                                                py: 1.6,
+                                                                borderTopRightRadius: 4,
+                                                                borderBottomRightRadius: 4,
+                                                                position: "fixed",
+                                                                bgcolor: color.black.dark,
+                                                                top: 0,
+                                                                left: "100%",
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+
+                                                                ":hover": {
+                                                                    bgcolor: color.black.main,
+                                                                    cursor: "pointer",
+                                                                },
+                                                            }}
+                                                        >
+                                                            <Close sx={{ color: color.white.main }} />
+                                                        </Box>
                                                     </Stack>
                                                 }
-                                                placement="right-end"
+                                                placement="bottom-start"
                                                 open={showTooltipShowError} // Hiển thị khi icon được click
                                                 onClose={() => setShowTooltipShowError(false)}
                                                 disableHoverListener // Không hiển thị khi hover
-                                                arrow // Mũi tên trên tooltip
+                                                // arrow // Mũi tên trên tooltip
                                             >
                                                 <ErrorOutline
                                                     onClick={handleToggleTooltipShowError}
