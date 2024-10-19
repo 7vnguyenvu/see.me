@@ -45,6 +45,7 @@ Chia sẻ các tính năng và dịch vụ hỗ trợ bạn trong công việc v
             buttonHandleDuplicate: "Xử lý ngay",
             buttonClear: "Làm mới",
             buttonDownloadAll: "Tải tất cả",
+            showStart: "Kết quả ảnh đang hiển thị",
             showEnd: "Tất cả kết quả đã được hiển thị!",
         },
         modal: {

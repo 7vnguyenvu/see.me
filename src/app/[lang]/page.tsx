@@ -1,6 +1,6 @@
 "use client";
 
-import { BOTTOMMENU_HEIGHT, BottomMenu, HEADER_HEIGHT, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
+import { BOTTOMMENU_HEIGHT, BottomMenu, Header, MARGIN_HEADER, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
 import { Box, Stack, Typography } from "@mui/joy";
 import { Fragment, useLayoutEffect, useState } from "react";
 import { HomeEn, HomeVi } from "@/locales";
@@ -28,7 +28,7 @@ export default function Page() {
         <Fragment>
             <Header />
             <Main>
-                <Main_Container sx={{ height: windowHeight - (HEADER_HEIGHT + 8) - (BOTTOMMENU_HEIGHT + 16 * 2) }}>
+                <Main_Container sx={{ height: windowHeight - MARGIN_HEADER - (BOTTOMMENU_HEIGHT + 16 * 2) }}>
                     <BottomMenu />
                     <Box
                         sx={{

@@ -4,6 +4,7 @@ export const LG_PADDING = 100;
 export const MD_PADDING = 12;
 export const XS_PADDING = 8;
 export const HEADER_HEIGHT = 60;
+export const MARGIN_HEADER = HEADER_HEIGHT + 8;
 
 export const color = {
     pink_Of_Nhi: {
@@ -61,6 +62,10 @@ export const color = {
         contrastText: "#000000",
     },
     transparent: "transparent",
+    body: {
+        light: "#ffffff",
+        dark: "#ffffff",
+    },
 };
 
 export const chooseThemeValueIn = (valueForLightTheme: string, valueForDarkTheme: string, systemMode: "light" | "dark"): string => {
