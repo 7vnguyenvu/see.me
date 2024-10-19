@@ -255,6 +255,26 @@ export default function Page() {
         setReloadImageURLs(false);
     };
 
+    const handleClearWithoutURLs = () => {
+        setFolderName("");
+        setValidImages([]);
+        setErrorImages([]);
+        setExcludedImages(new Set());
+        setBlobUrls({});
+        setAlert(null);
+        setProgress(0);
+        setLoadingValidImages(false);
+        setIsDownAllLoading(false);
+        setDuplicates({});
+        setIsHandleDuplicateLoading(false);
+        setProgressHandleImage(0);
+    };
+
+    const handleClearContent = () => {
+        setImageURLs("");
+        handleClearWithoutURLs();
+    };
+
     const loadURLs = () => {
         handleClearWithoutURLs();
         setLoadingValidImages(true);
@@ -454,26 +474,6 @@ export default function Page() {
         groups[error.errorType].push(error);
         return groups;
     }, {} as { [key: string]: { url: string; index: number }[] });
-
-    const handleClearContent = () => {
-        setImageURLs("");
-        handleClearWithoutURLs();
-    };
-
-    const handleClearWithoutURLs = () => {
-        setFolderName("");
-        setValidImages([]);
-        setErrorImages([]);
-        setExcludedImages(new Set());
-        setBlobUrls({});
-        setAlert(null);
-        setProgress(0);
-        setLoadingValidImages(false);
-        setIsDownAllLoading(false);
-        setDuplicates({});
-        setIsHandleDuplicateLoading(false);
-        setProgressHandleImage(0);
-    };
 
     return (
         <Fragment>
