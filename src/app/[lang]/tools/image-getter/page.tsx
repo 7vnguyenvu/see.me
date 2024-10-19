@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, CircularProgress, Divider, LinearProgress, Stack, Tooltip, Typography } from "@mui/joy";
-import { Breadcrumb, FindImageLinksModal, Header, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
+import { Breadcrumb, FindImageLinksModal, Header, MARGIN_HEADER, Main, Main_Container, chooseThemeValueIn, color } from "@/components";
 import { Delete, Download, ErrorOutline, Refresh } from "@mui/icons-material";
 import { ToolEn, ToolVi } from "@/locales";
 import { useEffect, useState } from "react";
@@ -340,9 +340,9 @@ export default function Page() {
                     const baseFileName = fileName.split(".").slice(0, -1).join(".");
 
                     let finalBlob = blob;
-                    if (extension === "webp") {
-                        finalBlob = await convertWebpToJpg(blob);
-                    }
+                    // if (extension === "webp") {
+                    //     finalBlob = await convertWebpToJpg(blob);
+                    // }
 
                     const img = new Image();
                     img.src = URL.createObjectURL(finalBlob);
@@ -351,7 +351,8 @@ export default function Page() {
                     const dimensions: [number, number] = [img.width, img.height];
                     const uniqueFileName = getUniqueFileName(baseFileName, dimensions);
 
-                    folder?.file(`${uniqueFileName}.${extension === "webp" ? "jpg" : extension}`, finalBlob);
+                    // folder?.file(`${uniqueFileName}.${extension === "webp" ? "jpg" : extension}`, finalBlob);
+                    folder?.file(`${uniqueFileName}.${extension}`, finalBlob);
                     URL.revokeObjectURL(img.src);
                 } catch (error) {
                     console.error(`Error downloading image from ${url}:`, error);
@@ -499,169 +500,188 @@ export default function Page() {
                                 {loadingValidImages && <LinearProgressWithLabel text={T.page.progressLabel} progress={progress} />}
                             </Grid>
 
-                            {/* Phần hiển thị thống kê ngay dưới textarea */}
-                            <Grid item xs={12} md={12}>
-                                <Stack direction={"row"} gap={2} sx={{ alignItems: "center" }}>
-                                    <Typography level="body-sm" textColor="neutral.600">
-                                        {T.page.analytics.total}: {imageURLs.split("\n").filter((url) => url.trim() !== "").length}
-                                    </Typography>
-                                    <Typography level="body-sm" textColor="neutral.600">
-                                        {T.page.analytics.success}: {validImages.length}
-                                    </Typography>
-                                    <Typography level="body-sm" textColor="neutral.600">
-                                        {T.page.analytics.fail}: {errorImages.length}
-                                    </Typography>
-                                    {errorImages.length > 0 && (
-                                        <Tooltip
-                                            title={
-                                                <Stack sx={{ p: 1 }} spacing={1}>
-                                                    {Object.keys(groupedErrors).map((errorType) => (
-                                                        <div key={errorType}>
-                                                            <Typography level="title-md" textColor={color.warning.main}>
-                                                                {`${errorType}`}
-                                                            </Typography>
-                                                            <ul
-                                                                style={{
-                                                                    paddingLeft: "20px",
-                                                                    listStyleType: "none",
-                                                                    color: color.pink.light,
-                                                                    margin: 0,
-                                                                }}
-                                                            >
-                                                                {groupedErrors[errorType].map(({ url, index }) => (
-                                                                    <li key={index}>
-                                                                        <Stack direction="row" gap={1}>
-                                                                            <Typography level="title-sm">{`URL [${index}]`}:</Typography>
-                                                                            <Typography level="title-sm">
-                                                                                <a
-                                                                                    href={`${url}`}
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    style={{ color: color.pink.light }}
-                                                                                >
-                                                                                    {url}
-                                                                                </a>
-                                                                            </Typography>
-                                                                        </Stack>
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    ))}
-                                                </Stack>
-                                            }
-                                            placement="right-end"
-                                            open={showTooltipShowError} // Hiển thị khi icon được click
-                                            onClose={() => setShowTooltipShowError(false)}
-                                            disableHoverListener // Không hiển thị khi hover
-                                            arrow // Mũi tên trên tooltip
-                                        >
-                                            <ErrorOutline
-                                                onClick={handleToggleTooltipShowError}
-                                                sx={{ scale: ".7 .7", cursor: "pointer", color: color.pink.main }}
-                                            />
-                                        </Tooltip>
-                                    )}
-                                </Stack>
-                                <Stack direction={"row"} gap={2} sx={{ alignItems: "center", mt: 1 }}>
-                                    <Typography level="body-sm" textColor="neutral.600">
-                                        {/* Thống kê số lượng ảnh trùng */}
-                                        {T.page.analytics.duplicates}: {Object.keys(duplicates).length}
-                                    </Typography>
-
-                                    {/* Nút xóa ảnh có chất lượng thấp */}
-                                    {!!Object.keys(duplicates).length && (
-                                        <Button
-                                            variant="solid"
-                                            color="warning"
-                                            size="sm"
-                                            disabled={isHandleDuplicateLoading}
-                                            onClick={handleRemoveAllLowerQuality}
-                                            endDecorator={
-                                                isHandleDuplicateLoading ? (
-                                                    <CircularProgress
-                                                        size="sm"
-                                                        variant="solid"
-                                                        color="warning"
-                                                        sx={{ scale: ".7 .7" }}
-                                                        thickness={4}
-                                                    />
-                                                ) : null
-                                            }
-                                        >
-                                            <Typography level="title-sm">
-                                                {isHandleDuplicateLoading ? `${progressHandleImage}%` : T.page.buttonHandleDuplicate}
-                                            </Typography>
-                                        </Button>
-                                    )}
-                                </Stack>
-                            </Grid>
-
-                            <Grid item xs={12} md={12}>
-                                <Grid container spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, alignItems: "end" }}>
-                                    <Grid item xs={12} md={8}>
-                                        <Box>
-                                            <label
-                                                style={{
-                                                    display: "block",
-                                                    margin: "10px 0",
-                                                    fontWeight: "bold" as const,
-                                                    color: "#333",
-                                                }}
+                            <Grid
+                                item
+                                xs={12}
+                                md={12}
+                                sx={{
+                                    bgcolor: color.body[systemMode],
+                                    position: "sticky",
+                                    top: MARGIN_HEADER,
+                                    zIndex: 1,
+                                }}
+                            >
+                                {/* Phần hiển thị thống kê ngay dưới textarea */}
+                                <Grid item xs={12} md={12}>
+                                    <Stack direction={"row"} gap={2} sx={{ alignItems: "center" }}>
+                                        <Typography level="body-sm" textColor="neutral.600">
+                                            {T.page.analytics.total}: {imageURLs.split("\n").filter((url) => url.trim() !== "").length}
+                                        </Typography>
+                                        <Typography level="body-sm" textColor="neutral.600">
+                                            {T.page.analytics.success}: {validImages.length}
+                                        </Typography>
+                                        <Typography level="body-sm" textColor="neutral.600">
+                                            {T.page.analytics.fail}: {errorImages.length}
+                                        </Typography>
+                                        {errorImages.length > 0 && (
+                                            <Tooltip
+                                                title={
+                                                    <Stack sx={{ p: 1 }} spacing={1}>
+                                                        {Object.keys(groupedErrors).map((errorType) => (
+                                                            <div key={errorType}>
+                                                                <Typography level="title-md" textColor={color.warning.main}>
+                                                                    {`${errorType}`}
+                                                                </Typography>
+                                                                <ul
+                                                                    style={{
+                                                                        paddingLeft: "20px",
+                                                                        listStyleType: "none",
+                                                                        color: color.pink.light,
+                                                                        margin: 0,
+                                                                    }}
+                                                                >
+                                                                    {groupedErrors[errorType].map(({ url, index }) => (
+                                                                        <li key={index}>
+                                                                            <Stack direction="row" gap={1}>
+                                                                                <Typography level="title-sm">{`URL [${index}]`}:</Typography>
+                                                                                <Typography level="title-sm">
+                                                                                    <a
+                                                                                        href={`${url}`}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        style={{ color: color.pink.light }}
+                                                                                    >
+                                                                                        {url}
+                                                                                    </a>
+                                                                                </Typography>
+                                                                            </Stack>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        ))}
+                                                    </Stack>
+                                                }
+                                                placement="right-end"
+                                                open={showTooltipShowError} // Hiển thị khi icon được click
+                                                onClose={() => setShowTooltipShowError(false)}
+                                                disableHoverListener // Không hiển thị khi hover
+                                                arrow // Mũi tên trên tooltip
                                             >
-                                                {T.page.folderNameLabel}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={folderName}
-                                                onChange={(e) => setFolderName(e.target.value)}
-                                                placeholder={T.page.folderNamePlaceholder}
-                                                style={{
-                                                    width: "100%",
-                                                    padding: "10px",
-                                                    border: "1px solid #ddd",
-                                                    borderRadius: "4px",
-                                                    boxSizing: "border-box" as const,
-                                                }}
-                                            />
-                                        </Box>
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
-                                        <Stack direction={"row"} gap={2} sx={{ flexGrow: 1, justifyContent: { xs: "center", md: "right" } }}>
-                                            <Button onClick={handleClearContent} color="danger" startDecorator={<Refresh />}>
-                                                {T.page.buttonClear}
-                                            </Button>
+                                                <ErrorOutline
+                                                    onClick={handleToggleTooltipShowError}
+                                                    sx={{ scale: ".7 .7", cursor: "pointer", color: color.pink.main }}
+                                                />
+                                            </Tooltip>
+                                        )}
+                                    </Stack>
+                                    <Stack direction={"row"} gap={2} sx={{ alignItems: "center", mt: 1 }}>
+                                        <Typography level="body-sm" textColor="neutral.600">
+                                            {/* Thống kê số lượng ảnh trùng */}
+                                            {T.page.analytics.duplicates}: {Object.keys(duplicates).length}
+                                        </Typography>
+
+                                        {/* Nút xóa ảnh có chất lượng thấp */}
+                                        {!!Object.keys(duplicates).length && (
                                             <Button
-                                                loading={isDownAllLoading}
-                                                disabled={validImages.length <= 0}
-                                                onClick={handleDownloadImages}
-                                                startDecorator={<Download />}
-                                                sx={{ flexGrow: 1 }}
+                                                variant="solid"
+                                                color="warning"
+                                                size="sm"
+                                                disabled={isHandleDuplicateLoading}
+                                                onClick={handleRemoveAllLowerQuality}
+                                                endDecorator={
+                                                    isHandleDuplicateLoading ? (
+                                                        <CircularProgress
+                                                            size="sm"
+                                                            variant="solid"
+                                                            color="warning"
+                                                            sx={{ scale: ".7 .7" }}
+                                                            thickness={4}
+                                                        />
+                                                    ) : null
+                                                }
                                             >
-                                                {T.page.buttonDownloadAll}
+                                                <Typography level="title-sm">
+                                                    {isHandleDuplicateLoading ? `${progressHandleImage}%` : T.page.buttonHandleDuplicate}
+                                                </Typography>
                                             </Button>
-                                        </Stack>
-                                    </Grid>
+                                        )}
+                                    </Stack>
                                 </Grid>
-                                {alert && (
-                                    <Box
-                                        sx={{
-                                            mt: 2,
-                                            color: "red",
-                                            fontSize: ".8rem",
-                                            fontWeight: "bold",
-                                            textAlign: "center",
-                                        }}
-                                    >
-                                        {alert}
-                                    </Box>
-                                )}
+
+                                <Grid item xs={12} md={12}>
+                                    <Grid container spacing={{ xs: 1, md: 2 }} sx={{ flexGrow: 1, alignItems: "end" }}>
+                                        <Grid item xs={12} md={8}>
+                                            <Box>
+                                                <label
+                                                    style={{
+                                                        display: "block",
+                                                        margin: "10px 0",
+                                                        fontWeight: "bold" as const,
+                                                        color: "#333",
+                                                    }}
+                                                >
+                                                    {T.page.folderNameLabel}
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={folderName}
+                                                    onChange={(e) => setFolderName(e.target.value)}
+                                                    placeholder={T.page.folderNamePlaceholder}
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "10px",
+                                                        border: "1px solid #ddd",
+                                                        borderRadius: "4px",
+                                                        boxSizing: "border-box" as const,
+                                                    }}
+                                                />
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={12} md={4}>
+                                            <Stack direction={"row"} gap={2} sx={{ flexGrow: 1, justifyContent: { xs: "center", md: "right" } }}>
+                                                <Button onClick={handleClearContent} color="danger" startDecorator={<Refresh />}>
+                                                    {T.page.buttonClear}
+                                                </Button>
+                                                <Button
+                                                    loading={isDownAllLoading}
+                                                    disabled={validImages.length <= 0}
+                                                    onClick={handleDownloadImages}
+                                                    startDecorator={<Download />}
+                                                    sx={{ flexGrow: 1 }}
+                                                >
+                                                    {T.page.buttonDownloadAll}
+                                                </Button>
+                                            </Stack>
+                                        </Grid>
+                                    </Grid>
+                                    {alert && (
+                                        <Box
+                                            sx={{
+                                                mt: 2,
+                                                color: "red",
+                                                fontSize: ".8rem",
+                                                fontWeight: "bold",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            {alert}
+                                        </Box>
+                                    )}
+                                    {validImages.length > 0 && (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Divider sx={{ my: 2 }}>
+                                                {validImages.filter((url) => !excludedImages.has(url)).length} {T.page.showStart}
+                                            </Divider>
+                                        </Box>
+                                    )}
+                                </Grid>
                             </Grid>
 
                             {/* Preview ảnh hợp lệ */}
                             {validImages.length > 0 && (
                                 <Grid item xs={12}>
-                                    <Grid container spacing={{ xs: 1, md: 1 }} sx={{ flexGrow: 1 }}>
+                                    <Grid container spacing={{ xs: 1, md: 1 }} sx={{ flexGrow: 1, overflow: "hidden" }}>
                                         {validImages.map((imageUrl, index) => {
                                             // Check if the image is excluded
                                             if (excludedImages.has(imageUrl)) {
